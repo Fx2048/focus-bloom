@@ -13,6 +13,7 @@ import { AddTaskForm } from '@/components/AddTaskForm';
 import { PointsBadges } from '@/components/PointsBadges';
 import { PomodoroTimer } from '@/components/PomodoroTimer';
 import { AIDailyPlan } from '@/components/AIDailyPlan';
+import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -180,6 +181,9 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Voice Command Button */}
+        <VoiceCommandButton onTaskCreate={addTask} />
 
         {/* Floating Add Button */}
         <div className="fixed bottom-6 right-6 z-40">
