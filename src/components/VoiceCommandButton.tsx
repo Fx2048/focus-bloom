@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, forwardRef } from 'react';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useNaturalLanguageParser, ParsedCommand } from '@/hooks/useNaturalLanguageParser';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -21,7 +21,8 @@ interface VoiceCommandButtonProps {
 
 type CommandState = 'idle' | 'listening' | 'processing' | 'confirming' | 'editing';
 
-export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
+export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonProps>(
+  function VoiceCommandButton({ onTaskCreate }, ref) {
   const [commandState, setCommandState] = useState<CommandState>('idle');
   const [parsedCommand, setParsedCommand] = useState<ParsedCommand | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
@@ -181,7 +182,7 @@ export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
   }
 
   return (
-    <>
+    <div ref={ref}>
       {/* Floating microphone button */}
       <div className="fixed bottom-24 right-6 z-40 flex flex-col gap-2">
         {/* Wake word mode button */}
@@ -385,6 +386,6 @@ export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
-}
+});
