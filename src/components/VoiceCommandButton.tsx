@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, forwardRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useNaturalLanguageParser, ParsedCommand } from '@/hooks/useNaturalLanguageParser';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -21,15 +21,14 @@ interface VoiceCommandButtonProps {
 
 type CommandState = 'idle' | 'listening' | 'processing' | 'confirming' | 'editing';
 
-export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonProps>(
-  function VoiceCommandButton({ onTaskCreate }, ref) {
+export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
   const [commandState, setCommandState] = useState<CommandState>('idle');
   const [parsedCommand, setParsedCommand] = useState<ParsedCommand | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [showPanel, setShowPanel] = useState(false);
 
   const { parseCommand } = useNaturalLanguageParser();
-  const { scheduleNotification, showNotification, requestPermission } = useNotifications();
+  const { scheduleNotification, requestPermission } = useNotifications();
 
   const handleCommand = useCallback((command: string) => {
     setCommandState('processing');
@@ -182,7 +181,7 @@ export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonP
   }
 
   return (
-    <div ref={ref}>
+    <>
       {/* Floating microphone button */}
       <div className="fixed bottom-24 right-6 z-40 flex flex-col gap-2">
         {/* Wake word mode button */}
@@ -386,6 +385,6 @@ export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonP
           </div>
         </div>
       )}
-    </div>
+    </>
   );
-});
+}
