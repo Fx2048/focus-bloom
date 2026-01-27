@@ -101,36 +101,6 @@ export function useTasks() {
     },
   });
 
-  const updateTaskMutation = useMutation({
-    mutationFn: async ({ taskId, updates }: { taskId: string; updates: Partial<{ name: string; difficulty: Difficulty; estimatedHours: number; scheduledDay: Date }> }) => {
-      const updateData: Record<string, unknown> = {};
-      
-      if (updates.name !== undefined) updateData.name = updates.name;
-      if (updates.difficulty !== undefined) updateData.difficulty = updates.difficulty;
-      if (updates.estimatedHours !== undefined) {
-        updateData.estimated_hours = updates.estimatedHours;
-        updateData.pomodoro_sessions = Math.ceil(updates.estimatedHours * 60 / 25);
-      }
-      if (updates.scheduledDay !== undefined) {
-        updateData.scheduled_day = updates.scheduledDay.toISOString().split('T')[0];
-      }
-
-      const { error } = await supabase
-        .from('tasks')
-        .update(updateData)
-        .eq('id', taskId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast.success('Tarea actualizada');
-    },
-    onError: (error) => {
-      toast.error('Error al actualizar tarea: ' + error.message);
-    },
-  });
-
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
       const { error } = await supabase
@@ -142,10 +112,10 @@ export function useTasks() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
-      toast.success('Tarea eliminada');
+      toast.success('Task deleted');
     },
     onError: (error) => {
-      toast.error('Error al eliminar tarea: ' + error.message);
+      toast.error('Failed to delete task: ' + error.message);
     },
   });
 
@@ -157,8 +127,6 @@ export function useTasks() {
       updateTaskStatusMutation.mutate({ taskId, status }),
     updateTaskPomodoros: (taskId: string, completedPomodoros: number) =>
       updateTaskPomodorosMutation.mutate({ taskId, completedPomodoros }),
-    updateTask: (taskId: string, updates: Partial<{ name: string; difficulty: Difficulty; estimatedHours: number; scheduledDay: Date }>) =>
-      updateTaskMutation.mutate({ taskId, updates }),
     deleteTask: deleteTaskMutation.mutate,
   };
 }
