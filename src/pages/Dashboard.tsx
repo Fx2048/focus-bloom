@@ -14,14 +14,17 @@ import { PointsBadges } from '@/components/PointsBadges';
 import { PomodoroTimer } from '@/components/PomodoroTimer';
 import { AIDailyPlan } from '@/components/AIDailyPlan';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { CalendarPanel } from '@/components/CalendarPanel';
+import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { BurnoutLevel, POINTS_PER_POMODORO } from '@/types/focusflow';
+import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { tasks, isLoading: tasksLoading, updateTaskStatus, updateTaskPomodoros, addTask, deleteTask } = useTasks();
+  const { tasks, isLoading: tasksLoading, updateTaskStatus, updateTaskPomodoros, addTask, updateTask, deleteTask } = useTasks();
   const { profile, addPoints } = useProfile();
   const { motivationLevel, skippedBreaks, setMotivationLevel, incrementSkippedBreaks } = useDailyLog();
   const { badges, earnBadge } = useBadges();
@@ -29,6 +32,7 @@ export default function Dashboard() {
   
   const [showAddTask, setShowAddTask] = useState(false);
   const [activePomodoro, setActivePomodoro] = useState<{ taskId: string; taskName: string } | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   // Calculate burnout level
   const burnoutLevel = useMemo((): BurnoutLevel => {
@@ -184,6 +188,24 @@ export default function Dashboard() {
 
         {/* Voice Command Button */}
         <VoiceCommandButton onTaskCreate={addTask} />
+
+        {/* Calendar Panel */}
+        <CalendarPanel 
+          tasks={tasks} 
+          onTaskClick={(task) => setEditingTask(task)} 
+        />
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
+
+        {/* Task Edit Dialog */}
+        <TaskEditDialog
+          task={editingTask}
+          isOpen={!!editingTask}
+          onClose={() => setEditingTask(null)}
+          onSave={(taskId, updates) => updateTask(taskId, updates)}
+          onDelete={(taskId) => deleteTask(taskId)}
+        />
 
         {/* Floating Add Button */}
         <div className="fixed bottom-6 right-6 z-40">
