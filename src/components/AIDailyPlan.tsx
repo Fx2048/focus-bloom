@@ -147,16 +147,16 @@ export function AIDailyPlan({ tasks, motivationLevel, maxDailyHours, onStartTask
               {plan.plan.map((item, index) => (
                 <div
                   key={item.taskId}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 animate-slide-up"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border animate-slide-up"
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-sm font-bold text-primary">{item.suggestedTime}</span>
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-primary">{item.suggestedTime}</span>
                   </div>
                   
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-foreground truncate">{item.taskName}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-foreground/70">
                       {item.duration}h • {item.pomodorosToComplete} 🍅 • {item.reason}
                     </p>
                   </div>

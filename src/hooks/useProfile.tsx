@@ -6,7 +6,6 @@ import { toast } from 'sonner';
 export interface Profile {
   id: string;
   userId: string;
-  email: string | null;
   maxDailyHours: number;
   totalPoints: number;
 }
@@ -31,7 +30,6 @@ export function useProfile() {
       return {
         id: data.id,
         userId: data.user_id,
-        email: data.email,
         maxDailyHours: data.max_daily_hours,
         totalPoints: data.total_points,
       } as Profile;
