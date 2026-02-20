@@ -1,4 +1,3 @@
-import { forwardRef } from 'react';
 import { Task, Difficulty, TaskStatus } from '@/types/focusflow';
 import { cn } from '@/lib/utils';
 import { Clock, Zap, Play, Check, Trash2 } from 'lucide-react';
@@ -18,16 +17,14 @@ const difficultyConfig: Record<Difficulty, { label: string; className: string; i
   high: { label: 'Hard', className: 'difficulty-high', icon: '🌳' },
 };
 
-export const TaskCard = forwardRef<HTMLDivElement, TaskCardProps>(
-  function TaskCard({ task, onStartPomodoro, onUpdateStatus, onDelete, isDragging }, ref) {
-    const difficulty = difficultyConfig[task.difficulty];
-    const progress = task.pomodoroSessions > 0 
-      ? (task.completedPomodoros / task.pomodoroSessions) * 100 
-      : 0;
+export function TaskCard({ task, onStartPomodoro, onUpdateStatus, onDelete, isDragging }: TaskCardProps) {
+  const difficulty = difficultyConfig[task.difficulty];
+  const progress = task.pomodoroSessions > 0 
+    ? (task.completedPomodoros / task.pomodoroSessions) * 100 
+    : 0;
 
-    return (
-      <div
-        ref={ref}
+  return (
+    <div
       className={cn(
         "card-calm p-4 transition-all duration-200",
         isDragging && "shadow-elevated rotate-2 scale-105",
@@ -128,7 +125,6 @@ export const TaskCard = forwardRef<HTMLDivElement, TaskCardProps>(
           </Button>
         )}
       </div>
-      </div>
-    );
-  }
-);
+    </div>
+  );
+}

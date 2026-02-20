@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, forwardRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useVoiceRecognition } from '@/hooks/useVoiceRecognition';
 import { useNaturalLanguageParser, ParsedCommand } from '@/hooks/useNaturalLanguageParser';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -21,36 +21,60 @@ interface VoiceCommandButtonProps {
 
 type CommandState = 'idle' | 'listening' | 'processing' | 'confirming' | 'editing';
 
-export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonProps>(
-  function VoiceCommandButton({ onTaskCreate }, ref) {
+export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
   const [commandState, setCommandState] = useState<CommandState>('idle');
   const [parsedCommand, setParsedCommand] = useState<ParsedCommand | null>(null);
   const [editedTitle, setEditedTitle] = useState('');
   const [showPanel, setShowPanel] = useState(false);
 
   const { parseCommand } = useNaturalLanguageParser();
-  const { scheduleNotification, showNotification, requestPermission } = useNotifications();
+  const { scheduleNotification, requestPermission } = useNotifications();
 
   const handleCommand = useCallback((command: string) => {
-    setCommandState('processing');
-    
-    const parsed = parseCommand(command);
-    
-    if (parsed) {
-      setParsedCommand(parsed);
-      setEditedTitle(parsed.title);
-      setCommandState('confirming');
+    try {
+      setCommandState('processing');
       
-      // Audio feedback
-      const utterance = new SpeechSynthesisUtterance(
-        `Entendido: ${parsed.title} para el ${format(parsed.date, "EEEE d 'de' MMMM", { locale: es })}${parsed.time ? ` a las ${parsed.time}` : ''}`
-      );
-      utterance.lang = 'es-ES';
-      utterance.rate = 1.1;
-      speechSynthesis.speak(utterance);
-    } else {
-      toast.error('No pude entender el comando. Intenta de nuevo.');
+      const parsed = parseCommand(command);
+      
+      if (parsed) {
+        // Validate the date before using it
+        const isValidDate = parsed.date instanceof Date && !isNaN(parsed.date.getTime());
+        
+        if (!isValidDate) {
+          console.warn('Invalid date in parsed command, using today as fallback');
+          parsed.date = new Date();
+          parsed.date.setHours(12, 0, 0, 0);
+        }
+        
+        setParsedCommand(parsed);
+        setEditedTitle(parsed.title);
+        setCommandState('confirming');
+        
+        // Safe date formatting with error handling
+        let formattedDate = 'hoy';
+        try {
+          formattedDate = format(parsed.date, "EEEE d 'de' MMMM", { locale: es });
+        } catch (formatError) {
+          console.warn('Error formatting date:', formatError);
+          formattedDate = 'hoy';
+        }
+        
+        // Audio feedback
+        const utterance = new SpeechSynthesisUtterance(
+          `Entendido: ${parsed.title} para el ${formattedDate}${parsed.time ? ` a las ${parsed.time}` : ''}`
+        );
+        utterance.lang = 'es-ES';
+        utterance.rate = 1.1;
+        speechSynthesis.speak(utterance);
+      } else {
+        toast.error('No pude entender el comando. Intenta de nuevo.');
+        setCommandState('idle');
+      }
+    } catch (error) {
+      console.error('Error processing voice command:', error);
+      toast.error('Ocurrió un error al procesar el comando. Intenta de nuevo.');
       setCommandState('idle');
+      setParsedCommand(null);
     }
   }, [parseCommand]);
 
@@ -107,58 +131,80 @@ export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonP
   }, [stopListening]);
 
   const handleConfirm = useCallback(() => {
-    if (!parsedCommand) return;
+    try {
+      if (!parsedCommand) return;
 
-    // Estimate difficulty based on title keywords
-    let difficulty: 'low' | 'medium' | 'high' = 'medium';
-    const lowerTitle = parsedCommand.title.toLowerCase();
-    if (/examen|proyecto|presentación|reunión importante/i.test(lowerTitle)) {
-      difficulty = 'high';
-    } else if (/comprar|llamar|revisar|enviar/i.test(lowerTitle)) {
-      difficulty = 'low';
+      // Validate the date one more time before creating the task
+      let taskDate = parsedCommand.date;
+      if (!(taskDate instanceof Date) || isNaN(taskDate.getTime())) {
+        console.warn('Invalid date detected in handleConfirm, using today');
+        taskDate = new Date();
+        taskDate.setHours(12, 0, 0, 0);
+      }
+
+      // Estimate difficulty based on title keywords
+      let difficulty: 'low' | 'medium' | 'high' = 'medium';
+      const lowerTitle = parsedCommand.title.toLowerCase();
+      if (/examen|proyecto|presentación|reunión importante/i.test(lowerTitle)) {
+        difficulty = 'high';
+      } else if (/comprar|llamar|revisar|enviar/i.test(lowerTitle)) {
+        difficulty = 'low';
+      }
+
+      // Estimate hours based on type
+      let estimatedHours = 1;
+      if (parsedCommand.type === 'event') {
+        estimatedHours = 1;
+      } else if (difficulty === 'high') {
+        estimatedHours = 2;
+      }
+
+      // Create the task with validated date
+      onTaskCreate({
+        name: editedTitle || parsedCommand.title,
+        difficulty,
+        estimatedHours,
+        scheduledDay: taskDate,
+      });
+
+      // Schedule notification if time is set
+      if (parsedCommand.time && taskDate instanceof Date && !isNaN(taskDate.getTime())) {
+        try {
+          const notificationId = `task-${Date.now()}`;
+          scheduleNotification(
+            notificationId,
+            `📅 ${editedTitle || parsedCommand.title}`,
+            `Recordatorio: ${parsedCommand.description}`,
+            taskDate,
+            10 // 10 minutes before
+          );
+          toast.success('✅ Tarea creada con recordatorio');
+        } catch (notifError) {
+          console.warn('Error scheduling notification:', notifError);
+          toast.success('✅ Tarea creada (sin recordatorio)');
+        }
+      } else {
+        toast.success('✅ Tarea creada');
+      }
+
+      // Audio confirmation
+      const utterance = new SpeechSynthesisUtterance('Listo, tarea creada');
+      utterance.lang = 'es-ES';
+      speechSynthesis.speak(utterance);
+
+      // Reset state
+      setParsedCommand(null);
+      setEditedTitle('');
+      setCommandState('idle');
+      setShowPanel(false);
+    } catch (error) {
+      console.error('Error confirming task:', error);
+      toast.error('Error al crear la tarea. Intenta de nuevo.');
+      // Reset state on error to prevent stuck UI
+      setParsedCommand(null);
+      setEditedTitle('');
+      setCommandState('idle');
     }
-
-    // Estimate hours based on type
-    let estimatedHours = 1;
-    if (parsedCommand.type === 'event') {
-      estimatedHours = 1;
-    } else if (difficulty === 'high') {
-      estimatedHours = 2;
-    }
-
-    // Create the task
-    onTaskCreate({
-      name: editedTitle || parsedCommand.title,
-      difficulty,
-      estimatedHours,
-      scheduledDay: parsedCommand.date,
-    });
-
-    // Schedule notification if time is set
-    if (parsedCommand.time) {
-      const notificationId = `task-${Date.now()}`;
-      scheduleNotification(
-        notificationId,
-        `📅 ${editedTitle || parsedCommand.title}`,
-        `Recordatorio: ${parsedCommand.description}`,
-        parsedCommand.date,
-        10 // 10 minutes before
-      );
-      toast.success('✅ Tarea creada con recordatorio');
-    } else {
-      toast.success('✅ Tarea creada');
-    }
-
-    // Audio confirmation
-    const utterance = new SpeechSynthesisUtterance('Listo, tarea creada');
-    utterance.lang = 'es-ES';
-    speechSynthesis.speak(utterance);
-
-    // Reset state
-    setParsedCommand(null);
-    setEditedTitle('');
-    setCommandState('idle');
-    setShowPanel(false);
   }, [parsedCommand, editedTitle, onTaskCreate, scheduleNotification]);
 
   const handleCancel = useCallback(() => {
@@ -182,7 +228,7 @@ export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonP
   }
 
   return (
-    <div ref={ref}>
+    <>
       {/* Floating microphone button */}
       <div className="fixed bottom-24 right-6 z-40 flex flex-col gap-2">
         {/* Wake word mode button */}
@@ -386,6 +432,6 @@ export const VoiceCommandButton = forwardRef<HTMLDivElement, VoiceCommandButtonP
           </div>
         </div>
       )}
-    </div>
+    </>
   );
-});
+}
