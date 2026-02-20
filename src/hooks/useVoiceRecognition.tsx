@@ -223,26 +223,32 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      console.error('Speech recognition error:', event.error);
-      let errorMessage = 'Error en el reconocimiento de voz';
+      console.warn('Speech recognition error:', event.error);
       
       switch (event.error) {
         case 'not-allowed':
-          errorMessage = 'Permiso de micrófono denegado';
           shouldRestartRef.current = false;
+          setState(prev => ({ ...prev, error: 'Permiso de micrófono denegado' }));
           break;
         case 'no-speech':
           // This is normal, just restart if we should
           return;
         case 'network':
-          errorMessage = 'Error de red. Verifica tu conexión a internet';
+          // Stop restart loop on network errors
+          shouldRestartRef.current = false;
+          setState(prev => ({ 
+            ...prev, 
+            error: 'Error de red. Verifica tu conexión a internet',
+            isListening: false,
+            isWaitingForWakeWord: false,
+          }));
           break;
         case 'aborted':
-          // Normal when stopping, don't show error
+          // Normal when stopping, don't show error but stop restarting after multiple aborts
           return;
+        default:
+          setState(prev => ({ ...prev, error: 'Error en el reconocimiento de voz' }));
       }
-      
-      setState(prev => ({ ...prev, error: errorMessage }));
     };
 
     recognition.onend = () => {
