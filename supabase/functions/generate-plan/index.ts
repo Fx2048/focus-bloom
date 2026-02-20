@@ -1,42 +1,23 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const VALID_DIFFICULTIES = ["low", "medium", "high"];
-const MAX_TASK_NAME_LENGTH = 200;
-const MAX_TASKS = 50;
+interface Task {
+  id: string;
+  name: string;
+  difficulty: 'low' | 'medium' | 'high';
+  estimatedHours: number;
+  pomodoroSessions: number;
+  completedPomodoros: number;
+}
 
-function validateAndSanitizeTasks(tasks: unknown): { id: string; name: string; difficulty: string; estimatedHours: number; pomodoroSessions: number; completedPomodoros: number }[] {
-  if (!Array.isArray(tasks)) throw new Error("tasks must be an array");
-  if (tasks.length > MAX_TASKS) throw new Error(`Maximum ${MAX_TASKS} tasks allowed`);
-  if (tasks.length === 0) return [];
-
-  return tasks.map((t, i) => {
-    if (!t || typeof t !== "object") throw new Error(`Task ${i} is invalid`);
-    if (typeof t.id !== "string" || t.id.length === 0) throw new Error(`Task ${i}: invalid id`);
-    if (typeof t.name !== "string" || t.name.length === 0) throw new Error(`Task ${i}: name required`);
-    if (t.name.length > MAX_TASK_NAME_LENGTH) throw new Error(`Task ${i}: name too long (max ${MAX_TASK_NAME_LENGTH})`);
-    if (!VALID_DIFFICULTIES.includes(t.difficulty)) throw new Error(`Task ${i}: invalid difficulty`);
-    if (typeof t.estimatedHours !== "number" || t.estimatedHours < 0.5 || t.estimatedHours > 24) throw new Error(`Task ${i}: estimatedHours must be 0.5-24`);
-    if (typeof t.pomodoroSessions !== "number" || !Number.isInteger(t.pomodoroSessions) || t.pomodoroSessions < 0) throw new Error(`Task ${i}: invalid pomodoroSessions`);
-    if (typeof t.completedPomodoros !== "number" || !Number.isInteger(t.completedPomodoros) || t.completedPomodoros < 0) throw new Error(`Task ${i}: invalid completedPomodoros`);
-
-    // Sanitize task name - strip control characters
-    const sanitizedName = t.name.replace(/[\x00-\x1f\x7f]/g, "").trim();
-
-    return {
-      id: t.id,
-      name: sanitizedName,
-      difficulty: t.difficulty,
-      estimatedHours: t.estimatedHours,
-      pomodoroSessions: t.pomodoroSessions,
-      completedPomodoros: t.completedPomodoros,
-    };
-  });
+interface PlanRequest {
+  tasks: Task[];
+  motivationLevel: number;
+  maxDailyHours: number;
 }
 
 serve(async (req) => {
@@ -45,57 +26,8 @@ serve(async (req) => {
   }
 
   try {
-    // --- Authentication ---
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // --- Input Validation ---
-    const body = await req.json();
-    const { tasks: rawTasks, motivationLevel, maxDailyHours } = body;
-
-    if (typeof motivationLevel !== "number" || motivationLevel < 1 || motivationLevel > 10 || !Number.isInteger(motivationLevel)) {
-      return new Response(
-        JSON.stringify({ error: "motivationLevel must be an integer between 1 and 10" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    if (typeof maxDailyHours !== "number" || maxDailyHours < 1 || maxDailyHours > 24) {
-      return new Response(
-        JSON.stringify({ error: "maxDailyHours must be between 1 and 24" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    let tasks;
-    try {
-      tasks = validateAndSanitizeTasks(rawTasks);
-    } catch (validationError) {
-      return new Response(
-        JSON.stringify({ error: validationError instanceof Error ? validationError.message : "Invalid input" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
+    const { tasks, motivationLevel, maxDailyHours }: PlanRequest = await req.json();
+    
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -197,6 +129,7 @@ Be kind, supportive, and prioritize wellbeing over productivity.`;
     // Extract JSON from the response
     let planData;
     try {
+      // Try to find JSON in the response
       const jsonMatch = content.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         planData = JSON.parse(jsonMatch[0]);
@@ -205,6 +138,7 @@ Be kind, supportive, and prioritize wellbeing over productivity.`;
       }
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
+      // Return a default plan
       planData = {
         plan: activeTasks.slice(0, 3).map((t, i) => ({
           taskId: t.id,
@@ -227,7 +161,7 @@ Be kind, supportive, and prioritize wellbeing over productivity.`;
   } catch (error) {
     console.error("generate-plan error:", error);
     return new Response(
-      JSON.stringify({ error: "An internal error occurred" }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
