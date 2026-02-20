@@ -108,6 +108,11 @@ export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
   useEffect(() => {
     if (isListening) {
       setCommandState(isWaitingForWakeWord ? 'idle' : 'listening');
+    } else if (commandState === 'listening' || commandState === 'processing') {
+      // If we stopped listening unexpectedly (e.g. network error), reset state
+      if (!parsedCommand) {
+        setCommandState('idle');
+      }
     }
   }, [isListening, isWaitingForWakeWord]);
 
