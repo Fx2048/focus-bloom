@@ -1,13 +1,8 @@
 import { Task, TaskStatus } from '@/types/focusflow';
 import { TaskCard } from '@/components/TaskCard';
+import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
 import { ClipboardList, Timer, CheckCircle2 } from 'lucide-react';
-
-const columns: { status: TaskStatus; title: string; icon: React.ElementType; color: string }[] = [
-  { status: 'pending', title: 'To Do', icon: ClipboardList, color: 'text-muted-foreground' },
-  { status: 'in-progress', title: 'In Progress', icon: Timer, color: 'text-ff-balanced' },
-  { status: 'completed', title: 'Done', icon: CheckCircle2, color: 'text-primary' },
-];
 
 interface KanbanBoardProps {
   tasks: Task[];
@@ -17,6 +12,14 @@ interface KanbanBoardProps {
 }
 
 export function KanbanBoard({ tasks, onStartPomodoro, onUpdateStatus, onDeleteTask }: KanbanBoardProps) {
+  const { t } = useLanguage();
+
+  const columns: { status: TaskStatus; title: string; icon: React.ElementType; color: string; emptyMsg: string }[] = [
+    { status: 'pending', title: t('kanban.todo'), icon: ClipboardList, color: 'text-muted-foreground', emptyMsg: t('kanban.addTasks') },
+    { status: 'in-progress', title: t('kanban.inProgress'), icon: Timer, color: 'text-ff-balanced', emptyMsg: t('kanban.dragHere') },
+    { status: 'completed', title: t('kanban.done'), icon: CheckCircle2, color: 'text-primary', emptyMsg: t('kanban.completeToSee') },
+  ];
+
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
     e.dataTransfer.setData('taskId', taskId);
   };
@@ -28,19 +31,13 @@ export function KanbanBoard({ tasks, onStartPomodoro, onUpdateStatus, onDeleteTa
   const handleDrop = (e: React.DragEvent, status: TaskStatus) => {
     e.preventDefault();
     const taskId = e.dataTransfer.getData('taskId');
-    const task = tasks.find(t => t.id === taskId);
-    
-    // Don't allow moving completed tasks
-    if (task && task.status !== 'completed') {
-      onUpdateStatus(taskId, status);
-    }
+    onUpdateStatus(taskId, status);
   };
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold text-foreground">Your Tasks</h2>
+      <h2 className="text-xl font-bold text-foreground">{t('kanban.title')}</h2>
       
-      {/* Mobile: Stacked columns */}
       <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
         {columns.map((column) => {
           const columnTasks = tasks.filter(t => t.status === column.status);
@@ -53,7 +50,6 @@ export function KanbanBoard({ tasks, onStartPomodoro, onUpdateStatus, onDeleteTa
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, column.status)}
             >
-              {/* Column header */}
               <div className={cn(
                 "flex items-center gap-2 mb-3 pb-2 border-b-2",
                 column.status === 'pending' && 'border-muted',
@@ -67,25 +63,18 @@ export function KanbanBoard({ tasks, onStartPomodoro, onUpdateStatus, onDeleteTa
                 </span>
               </div>
 
-              {/* Tasks */}
               <div className="space-y-3">
                 {columnTasks.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <p className="text-sm">
-                      {column.status === 'pending' && 'Add tasks to get started'}
-                      {column.status === 'in-progress' && 'Drag tasks here to start'}
-                      {column.status === 'completed' && 'Complete tasks to see them here'}
-                    </p>
+                    <p className="text-sm">{column.emptyMsg}</p>
                   </div>
                 ) : (
                   columnTasks.map((task) => (
                     <div
                       key={task.id}
-                      draggable={task.status !== 'completed'}
+                      draggable
                       onDragStart={(e) => handleDragStart(e, task.id)}
-                      className={cn(
-                        task.status !== 'completed' && "cursor-grab active:cursor-grabbing"
-                      )}
+                      className="cursor-grab active:cursor-grabbing"
                     >
                       <TaskCard
                         task={task}

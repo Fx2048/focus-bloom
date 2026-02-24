@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Leaf, Mail, ArrowRight, Sparkles, Shield, Heart, Lock, UserPlus, LogIn } from 'lucide-react';
+import { Leaf, Mail, Sparkles, Shield, Heart, Lock, UserPlus, LogIn, Globe, UserX } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const { signIn, signUp } = useAuth();
+  const { language, setLanguage, t } = useLanguage();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,15 +31,32 @@ export default function Login() {
     setIsLoading(false);
   };
 
+  const handleGuestMode = () => {
+    localStorage.setItem('tizza-guest-mode', 'true');
+    navigate('/dashboard');
+  };
+
   const features = [
-    { icon: Sparkles, text: 'AI-powered daily planning' },
-    { icon: Shield, text: 'Burnout prevention' },
-    { icon: Heart, text: 'Mental health first' },
+    { icon: Sparkles, text: t('login.aiPlanning') },
+    { icon: Shield, text: t('login.burnoutPrevention') },
+    { icon: Heart, text: t('login.mentalHealth') },
   ];
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Hero section */}
+      {/* Language toggle */}
+      <div className="absolute top-4 right-4 z-10">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => setLanguage(language === 'es' ? 'en' : 'es')}
+          className="gap-1"
+        >
+          <Globe className="w-4 h-4" />
+          {language === 'es' ? 'EN' : 'ES'}
+        </Button>
+      </div>
+
       <div className="flex-1 flex flex-col items-center justify-center p-6">
         {/* Logo */}
         <div className="mb-8 animate-float">
@@ -46,10 +67,10 @@ export default function Login() {
 
         {/* Title */}
         <h1 className="text-4xl font-bold text-center mb-3">
-          <span className="gradient-text-calm">FocusFlow</span>
+          <span className="gradient-text-calm">{t('login.title')}</span>
         </h1>
         <p className="text-center text-muted-foreground mb-8 max-w-sm text-balance">
-          Study smarter, not harder. Balance your workload with science-backed focus techniques.
+          {t('login.subtitle')}
         </p>
 
         {/* Features */}
@@ -66,7 +87,7 @@ export default function Login() {
           ))}
         </div>
 
-        {/* Login/SignUp form */}
+        {/* Login form */}
         <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 animate-fade-in">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -109,18 +130,18 @@ export default function Login() {
             disabled={isLoading || !email.trim() || !password.trim()}
           >
             {isLoading ? (
-              <span className="animate-pulse">{isSignUp ? 'Creating account...' : 'Signing in...'}</span>
+              <span className="animate-pulse">{isSignUp ? t('login.signingUp') : t('login.signingIn')}</span>
             ) : (
               <>
                 {isSignUp ? (
                   <>
                     <UserPlus className="w-5 h-5" />
-                    Create Account
+                    {t('login.signUp')}
                   </>
                 ) : (
                   <>
                     <LogIn className="w-5 h-5" />
-                    Sign In
+                    {t('login.signIn')}
                   </>
                 )}
               </>
@@ -132,17 +153,42 @@ export default function Login() {
             onClick={() => setIsSignUp(!isSignUp)}
             className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors"
           >
-            {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+            {isSignUp ? t('login.hasAccount') : t('login.noAccount')}
           </button>
         </form>
 
+        {/* Guest mode */}
+        <div className="mt-6 w-full max-w-sm">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">o</span>
+            </div>
+          </div>
+          
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="w-full mt-4 gap-2"
+            onClick={handleGuestMode}
+          >
+            <UserX className="w-5 h-5" />
+            {t('login.guest')}
+          </Button>
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            {t('login.guestDesc')}
+          </p>
+        </div>
+
         <p className="text-xs text-muted-foreground text-center mt-6 max-w-xs">
-          By continuing, you agree to focus on your wellbeing and take regular breaks 💚
+          {t('login.agreement')}
         </p>
       </div>
 
-      {/* Bottom decoration */}
-      <div className="h-32 bg-gradient-to-t from-secondary/50 to-transparent" />
+      <div className="h-20 bg-gradient-to-t from-secondary/50 to-transparent" />
     </div>
   );
 }
