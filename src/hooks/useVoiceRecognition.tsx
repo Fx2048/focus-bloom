@@ -43,15 +43,35 @@ interface VoiceRecognitionState {
 interface UseVoiceRecognitionOptions {
   wakeWord?: string;
   silenceTimeout?: number;
+  maxDuration?: number;
+  maxCharacters?: number;
   language?: string;
   onCommand?: (command: string) => void;
   onWakeWordDetected?: () => void;
 }
 
+function detectDuplicatePhrase(text: string, threshold = 3): boolean {
+  const words = text.toLowerCase().split(/\s+/);
+  if (words.length < 6) return false;
+  
+  // Check for repeating 2-4 word phrases
+  for (let phraseLen = 2; phraseLen <= 4; phraseLen++) {
+    const phrases: Record<string, number> = {};
+    for (let i = 0; i <= words.length - phraseLen; i++) {
+      const phrase = words.slice(i, i + phraseLen).join(' ');
+      phrases[phrase] = (phrases[phrase] || 0) + 1;
+      if (phrases[phrase] >= threshold) return true;
+    }
+  }
+  return false;
+}
+
 export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
   const {
     wakeWord = 'hola flofy',
-    silenceTimeout = 3000,
+    silenceTimeout = 2000,
+    maxDuration = 30000,
+    maxCharacters = 200,
     language = 'es-ES',
     onCommand,
     onWakeWordDetected,
@@ -69,13 +89,13 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
 
   const recognitionRef = useRef<SpeechRecognitionType | null>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const maxDurationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const commandBufferRef = useRef<string>('');
   const isCapturingCommandRef = useRef<boolean>(false);
   const shouldRestartRef = useRef<boolean>(false);
   const onCommandRef = useRef(onCommand);
   const onWakeWordDetectedRef = useRef(onWakeWordDetected);
 
-  // Keep refs updated
   useEffect(() => {
     onCommandRef.current = onCommand;
     onWakeWordDetectedRef.current = onWakeWordDetected;
@@ -88,49 +108,54 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
     }
   }, []);
 
+  const clearMaxDurationTimer = useCallback(() => {
+    if (maxDurationTimerRef.current) {
+      clearTimeout(maxDurationTimerRef.current);
+      maxDurationTimerRef.current = null;
+    }
+  }, []);
+
+  const finishCommand = useCallback(() => {
+    const command = commandBufferRef.current.trim();
+    clearSilenceTimer();
+    clearMaxDurationTimer();
+    shouldRestartRef.current = false;
+    
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
+    }
+    
+    commandBufferRef.current = '';
+    isCapturingCommandRef.current = false;
+    
+    setState(prev => ({ 
+      ...prev, 
+      transcript: command,
+      interimTranscript: '',
+      isListening: false,
+      isWaitingForWakeWord: false,
+    }));
+    
+    if (command) {
+      onCommandRef.current?.(command);
+    }
+  }, [clearSilenceTimer, clearMaxDurationTimer]);
+
   const startSilenceTimer = useCallback(() => {
     clearSilenceTimer();
     silenceTimerRef.current = setTimeout(() => {
       if (isCapturingCommandRef.current && commandBufferRef.current.trim()) {
-        // Silence detected, process the command
-        const command = commandBufferRef.current.trim();
-        
-        // Stop listening first to prevent any further events
-        shouldRestartRef.current = false;
-        if (recognitionRef.current) {
-          try {
-            recognitionRef.current.stop();
-          } catch (e) {
-            // Ignore
-          }
-        }
-        
-        commandBufferRef.current = '';
-        isCapturingCommandRef.current = false;
-        
-        setState(prev => ({ 
-          ...prev, 
-          transcript: command,
-          interimTranscript: '',
-          isListening: false,
-          isWaitingForWakeWord: false,
-        }));
-        
-        // Call onCommand after state is updated
-        onCommandRef.current?.(command);
+        finishCommand();
       }
     }, silenceTimeout);
-  }, [clearSilenceTimer, silenceTimeout]);
+  }, [clearSilenceTimer, silenceTimeout, finishCommand]);
 
   const stopListening = useCallback(() => {
     clearSilenceTimer();
+    clearMaxDurationTimer();
     shouldRestartRef.current = false;
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore errors when stopping
-      }
+      try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
     }
     commandBufferRef.current = '';
     isCapturingCommandRef.current = false;
@@ -140,7 +165,7 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
       isWaitingForWakeWord: false,
       interimTranscript: '',
     }));
-  }, [clearSilenceTimer]);
+  }, [clearSilenceTimer, clearMaxDurationTimer]);
 
   const startListening = useCallback((waitForWakeWord = true) => {
     if (!state.isSupported) {
@@ -148,13 +173,8 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
       return;
     }
 
-    // Stop any existing recognition
     if (recognitionRef.current) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {
-        // Ignore
-      }
+      try { recognitionRef.current.stop(); } catch (e) { /* ignore */ }
     }
 
     shouldRestartRef.current = true;
@@ -175,6 +195,16 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
         transcript: '',
         interimTranscript: '',
       }));
+      
+      // Start max duration timer
+      clearMaxDurationTimer();
+      maxDurationTimerRef.current = setTimeout(() => {
+        if (isCapturingCommandRef.current && commandBufferRef.current.trim()) {
+          finishCommand();
+        } else {
+          stopListening();
+        }
+      }, maxDuration);
     };
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
@@ -192,12 +222,26 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
 
       const currentText = (finalTranscript + interimTranscript).toLowerCase().trim();
 
-      // Check for wake word if waiting
+      // Duplicate phrase detection — stop if looping
+      const fullBuffer = commandBufferRef.current + ' ' + currentText;
+      if (fullBuffer.length > 50 && detectDuplicatePhrase(fullBuffer)) {
+        // Take only the first non-repeated portion
+        const cleanCommand = commandBufferRef.current.trim().split(/\s+/).slice(0, 15).join(' ');
+        commandBufferRef.current = cleanCommand;
+        finishCommand();
+        return;
+      }
+
+      // Character limit check
+      if (commandBufferRef.current.length > maxCharacters) {
+        finishCommand();
+        return;
+      }
+
       if (!isCapturingCommandRef.current) {
         if (currentText.includes(wakeWord.toLowerCase())) {
           isCapturingCommandRef.current = true;
           onWakeWordDetectedRef.current?.();
-          // Remove wake word from command
           const afterWakeWord = currentText.split(wakeWord.toLowerCase()).pop()?.trim() || '';
           commandBufferRef.current = afterWakeWord;
           setState(prev => ({ 
@@ -210,7 +254,6 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
           setState(prev => ({ ...prev, interimTranscript: currentText }));
         }
       } else {
-        // Capturing command
         if (finalTranscript) {
           commandBufferRef.current += ' ' + finalTranscript;
         }
@@ -231,11 +274,10 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
           setState(prev => ({ ...prev, error: 'Permiso de micrófono denegado' }));
           break;
         case 'no-speech':
-          // This is normal, just restart if we should
           return;
         case 'network':
-          // Stop restart loop on network errors
           shouldRestartRef.current = false;
+          clearMaxDurationTimer();
           setState(prev => ({ 
             ...prev, 
             error: 'Error de red. Verifica tu conexión a internet',
@@ -244,7 +286,6 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
           }));
           break;
         case 'aborted':
-          // Normal when stopping, don't show error but stop restarting after multiple aborts
           return;
         default:
           setState(prev => ({ ...prev, error: 'Error en el reconocimiento de voz' }));
@@ -252,7 +293,6 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
     };
 
     recognition.onend = () => {
-      // Only restart if we explicitly want to keep listening
       if (shouldRestartRef.current) {
         try {
           setTimeout(() => {
@@ -280,22 +320,22 @@ export function useVoiceRecognition(options: UseVoiceRecognitionOptions = {}) {
       console.error('Failed to start recognition:', e);
       setState(prev => ({ ...prev, error: 'Error al iniciar el reconocimiento de voz' }));
     }
-  }, [state.isSupported, language, wakeWord, startSilenceTimer]);
+  }, [state.isSupported, language, wakeWord, startSilenceTimer, maxDuration, maxCharacters, finishCommand, stopListening, clearMaxDurationTimer]);
 
   const startDirectListening = useCallback(() => {
     startListening(false);
     isCapturingCommandRef.current = true;
   }, [startListening]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       clearSilenceTimer();
+      clearMaxDurationTimer();
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
     };
-  }, [clearSilenceTimer]);
+  }, [clearSilenceTimer, clearMaxDurationTimer]);
 
   return {
     ...state,

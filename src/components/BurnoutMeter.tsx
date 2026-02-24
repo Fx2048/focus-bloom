@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Flame, Leaf, Snowflake } from 'lucide-react';
 import { BurnoutLevel } from '@/types/focusflow';
 
@@ -9,34 +10,36 @@ interface BurnoutMeterProps {
 }
 
 export function BurnoutMeter({ burnoutLevel, totalPomodoros, skippedBreaks }: BurnoutMeterProps) {
+  const { t } = useLanguage();
+
   const getLevelInfo = () => {
     switch (burnoutLevel) {
       case 'lazy':
         return {
-          label: 'Taking it Easy',
+          label: t('burnout.lazy'),
           icon: Snowflake,
           color: 'text-ff-lazy',
           bgColor: 'bg-ff-lazy/20',
           fillHeight: '25%',
-          message: 'Ready to start focusing?',
+          message: t('burnout.lazyMsg'),
         };
       case 'balanced':
         return {
-          label: 'Perfectly Balanced',
+          label: t('burnout.balanced'),
           icon: Leaf,
           color: 'text-ff-balanced',
           bgColor: 'bg-ff-balanced/20',
           fillHeight: '50%',
-          message: 'Great job maintaining balance!',
+          message: t('burnout.balancedMsg'),
         };
       case 'burnout':
         return {
-          label: 'Take a Break',
+          label: t('burnout.burnout'),
           icon: Flame,
           color: 'text-ff-burnout',
           bgColor: 'bg-ff-burnout/20',
           fillHeight: '85%',
-          message: 'Consider resting soon',
+          message: t('burnout.burnoutMsg'),
         };
     }
   };
@@ -58,7 +61,6 @@ export function BurnoutMeter({ burnoutLevel, totalPomodoros, skippedBreaks }: Bu
             )}
             style={{ height: info.fillHeight }}
           />
-          {/* Mercury bulb */}
           <div
             className={cn(
               "absolute -bottom-2 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full shadow-lg",
@@ -77,14 +79,13 @@ export function BurnoutMeter({ burnoutLevel, totalPomodoros, skippedBreaks }: Bu
           </div>
           <p className="text-sm text-muted-foreground mb-3">{info.message}</p>
           
-          {/* Stats pills */}
           <div className="flex flex-wrap gap-2">
             <span className="text-xs px-2 py-1 rounded-full bg-secondary">
-              🍅 {totalPomodoros} sessions
+              🍅 {totalPomodoros} {t('burnout.sessions')}
             </span>
             {skippedBreaks > 0 && (
               <span className="text-xs px-2 py-1 rounded-full bg-ff-burnout/20 text-ff-burnout">
-                ⚠️ {skippedBreaks} skipped breaks
+                ⚠️ {skippedBreaks} {t('burnout.skippedBreaks')}
               </span>
             )}
           </div>

@@ -1,38 +1,72 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTasks } from '@/hooks/useTasks';
+import { useGuestTasks } from '@/hooks/useGuestMode';
 import { useProfile } from '@/hooks/useProfile';
 import { useDailyLog } from '@/hooks/useDailyLog';
 import { useBadges } from '@/hooks/useBadges';
 import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
+import { useMoodCalculator } from '@/hooks/useMoodCalculator';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Header } from '@/components/Header';
 import { BurnoutMeter } from '@/components/BurnoutMeter';
 import { MotivationSlider } from '@/components/MotivationSlider';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { AddTaskForm } from '@/components/AddTaskForm';
-import { PointsBadges } from '@/components/PointsBadges';
 import { PomodoroTimer } from '@/components/PomodoroTimer';
 import { AIDailyPlan } from '@/components/AIDailyPlan';
 import { VoiceCommandButton } from '@/components/VoiceCommandButton';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { CalendarPanel } from '@/components/CalendarPanel';
 import { TaskEditDialog } from '@/components/TaskEditDialog';
+import { MobileSearchBar } from '@/components/MobileSearchBar';
+import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { tasks, isLoading: tasksLoading, updateTaskStatus, updateTaskPomodoros, addTask, updateTask, deleteTask } = useTasks();
+  const isGuest = !user;
+  
+  // Use guest hooks for guest mode, real hooks for authenticated
+  const authTasks = useTasks();
+  const guestTasks = useGuestTasks();
+  const taskHooks = isGuest ? guestTasks : authTasks;
+  const { tasks, isLoading: tasksLoading, updateTaskStatus, updateTaskPomodoros, addTask, updateTask, deleteTask } = taskHooks;
+  
   const { profile, addPoints } = useProfile();
   const { motivationLevel, skippedBreaks, setMotivationLevel, incrementSkippedBreaks } = useDailyLog();
   const { badges, earnBadge } = useBadges();
   const { completedWorkSessions, createSession, completeSession } = usePomodoroSessions();
+  const { suggestedMood } = useMoodCalculator({ tasks, completedWorkSessions });
+  const { t } = useLanguage();
+  const { showOnboarding, markOnboardingDone } = useOnboarding();
   
   const [showAddTask, setShowAddTask] = useState(false);
   const [activePomodoro, setActivePomodoro] = useState<{ taskId: string; taskName: string } | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showOnboardingModal, setShowOnboardingModal] = useState(showOnboarding);
+  const [activeTab, setActiveTab] = useState('summary');
+  const [moodInitialized, setMoodInitialized] = useState(false);
+
+  // Suggest mood on first load
+  useEffect(() => {
+    if (!moodInitialized && tasks.length > 0) {
+      setMoodInitialized(true);
+      // Don't override if user already set it today
+    }
+  }, [tasks, moodInitialized]);
+
+  // Filter tasks by search
+  const filteredTasks = useMemo(() => {
+    if (!searchQuery.trim()) return tasks;
+    const q = searchQuery.toLowerCase();
+    return tasks.filter(t => t.name.toLowerCase().includes(q));
+  }, [tasks, searchQuery]);
 
   // Calculate burnout level
   const burnoutLevel = useMemo((): BurnoutLevel => {
@@ -65,20 +99,11 @@ export default function Dashboard() {
   const handlePomodoroComplete = useCallback(async (taskId: string) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      // Update task pomodoros
       updateTaskPomodoros(taskId, task.completedPomodoros + 1);
-      // Add points
       addPoints(POINTS_PER_POMODORO);
-      // Check for badges
-      if (completedWorkSessions === 0) {
-        earnBadge('first-focus');
-      }
-      if (completedWorkSessions >= 9) {
-        earnBadge('consistency');
-      }
-      if (new Date().getHours() < 9) {
-        earnBadge('early-bird');
-      }
+      if (completedWorkSessions === 0) earnBadge('first-focus');
+      if (completedWorkSessions >= 9) earnBadge('consistency');
+      if (new Date().getHours() < 9) earnBadge('early-bird');
     }
   }, [tasks, updateTaskPomodoros, addPoints, completedWorkSessions, earnBadge]);
 
@@ -88,13 +113,16 @@ export default function Dashboard() {
 
   const handleTaskComplete = useCallback((taskId: string) => {
     const completedToday = tasks.filter(t => t.status === 'completed').length + 1;
-    if (completedToday >= 5) {
-      earnBadge('task-master');
-    }
-    if (completedToday >= 3 && skippedBreaks === 0) {
-      earnBadge('balanced-day');
-    }
+    if (completedToday >= 5) earnBadge('task-master');
+    if (completedToday >= 3 && skippedBreaks === 0) earnBadge('balanced-day');
   }, [tasks, skippedBreaks, earnBadge]);
+
+  const getGreeting = (): string => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('greeting.morning');
+    if (hour < 17) return t('greeting.afternoon');
+    return t('greeting.evening');
+  };
 
   if (tasksLoading) {
     return (
@@ -104,72 +132,111 @@ export default function Dashboard() {
     );
   }
 
+  const pendingCount = tasks.filter(t => t.status !== 'completed').length;
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Onboarding */}
+      {showOnboardingModal && (
+        <OnboardingTutorial onComplete={() => {
+          markOnboardingDone();
+          setShowOnboardingModal(false);
+        }} />
+      )}
+
       <Header />
 
-      <main className="container px-4 py-6 pb-24 max-w-2xl mx-auto">
+      <main className="container px-4 py-6 pb-28 max-w-3xl mx-auto">
         {/* Greeting */}
-        <div className="mb-6 animate-fade-in">
+        <div className="mb-5 animate-fade-in">
           <h1 className="text-2xl font-bold text-foreground mb-1">
             {getGreeting()} 👋
           </h1>
           <p className="text-muted-foreground">
-            {tasks.filter(t => t.status !== 'completed').length === 0
-              ? "No tasks yet. Add one to get started!"
-              : `You have ${tasks.filter(t => t.status !== 'completed').length} task${tasks.filter(t => t.status !== 'completed').length === 1 ? '' : 's'} to focus on.`}
+            {pendingCount === 0
+              ? t('greeting.noTasks')
+              : `${pendingCount} ${t('greeting.tasksCount')}`}
           </p>
         </div>
 
-        {/* Top cards grid */}
-        <div className="grid gap-4 mb-6 sm:grid-cols-2">
-          <MotivationSlider 
-            motivationLevel={motivationLevel} 
-            onMotivationChange={setMotivationLevel} 
-          />
-          <BurnoutMeter 
-            burnoutLevel={burnoutLevel} 
-            totalPomodoros={completedWorkSessions}
-            skippedBreaks={skippedBreaks}
-          />
-        </div>
-
-        {/* AI Daily Plan */}
-        {tasks.length > 0 && (
-          <div className="mb-6">
-            <AIDailyPlan 
-              tasks={tasks}
-              motivationLevel={motivationLevel}
-              maxDailyHours={profile?.maxDailyHours ?? 6}
-              onStartTask={handleStartPomodoro}
+        {/* Desktop search bar */}
+        <div className="hidden sm:block mb-5">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t('search.placeholder')}
+              className="w-full pl-9 h-10 bg-muted border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-        )}
-
-        {/* Points & Badges */}
-        <div className="mb-6">
-          <PointsBadges 
-            totalPoints={profile?.totalPoints ?? 0}
-            badges={badges}
-            completedTasksToday={tasks.filter(t => t.status === 'completed').length}
-            totalPomodorosToday={completedWorkSessions}
-          />
         </div>
 
-        {/* Kanban Board */}
-        <div className="mb-6">
-          <KanbanBoard 
-            tasks={tasks}
-            onStartPomodoro={handleStartPomodoro}
-            onUpdateStatus={(taskId, status) => {
-              updateTaskStatus(taskId, status);
-              if (status === 'completed') {
-                handleTaskComplete(taskId);
-              }
-            }}
-            onDeleteTask={deleteTask}
-          />
-        </div>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
+          <TabsList className="w-full grid grid-cols-2 h-12 rounded-xl bg-muted">
+            <TabsTrigger value="summary" className="rounded-lg gap-2 font-semibold data-[state=active]:shadow-soft">
+              <LayoutDashboard className="w-4 h-4" />
+              {t('tab.summary')}
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="rounded-lg gap-2 font-semibold data-[state=active]:shadow-soft">
+              <ListTodo className="w-4 h-4" />
+              {t('tab.tasks')}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* ===== TAB: SUMMARY ===== */}
+          <TabsContent value="summary" className="space-y-5 mt-0">
+            {/* Mood + Burnout grid */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <MotivationSlider 
+                motivationLevel={motivationLevel} 
+                onMotivationChange={setMotivationLevel}
+                suggestedMood={suggestedMood}
+              />
+              <BurnoutMeter 
+                burnoutLevel={burnoutLevel} 
+                totalPomodoros={completedWorkSessions}
+                skippedBreaks={skippedBreaks}
+              />
+            </div>
+
+            {/* AI Daily Plan */}
+            {!isGuest && tasks.length > 0 && (
+              <AIDailyPlan 
+                tasks={tasks}
+                motivationLevel={motivationLevel}
+                maxDailyHours={profile?.maxDailyHours ?? 6}
+                onStartTask={handleStartPomodoro}
+              />
+            )}
+
+            {/* Calendar Panel - inline for summary */}
+            <CalendarPanel 
+              tasks={filteredTasks} 
+              onTaskClick={(task) => setEditingTask(task)} 
+            />
+          </TabsContent>
+
+          {/* ===== TAB: TASKS ===== */}
+          <TabsContent value="tasks" className="space-y-5 mt-0">
+            {/* Voice Command Button */}
+            <VoiceCommandButton onTaskCreate={addTask} />
+
+            {/* Kanban Board */}
+            <KanbanBoard 
+              tasks={filteredTasks}
+              onStartPomodoro={handleStartPomodoro}
+              onUpdateStatus={(taskId, status) => {
+                updateTaskStatus(taskId, status);
+                if (status === 'completed') {
+                  handleTaskComplete(taskId);
+                }
+              }}
+              onDeleteTask={deleteTask}
+            />
+          </TabsContent>
+        </Tabs>
 
         {/* Add Task Modal */}
         {showAddTask && (
@@ -186,15 +253,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Voice Command Button */}
-        <VoiceCommandButton onTaskCreate={addTask} />
-
-        {/* Calendar Panel */}
-        <CalendarPanel 
-          tasks={tasks} 
-          onTaskClick={(task) => setEditingTask(task)} 
-        />
-
         {/* Theme Toggle */}
         <ThemeToggle />
 
@@ -207,20 +265,33 @@ export default function Dashboard() {
           onDelete={(taskId) => deleteTask(taskId)}
         />
 
-        {/* Floating Add Button */}
-        <div className="fixed bottom-6 right-6 z-40">
+        {/* Floating Add Button — centered bottom */}
+        <div className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-40">
           <Button
             size="xl"
             variant={showAddTask ? "soft" : "calm"}
             onClick={() => setShowAddTask(!showAddTask)}
             className={cn(
-              "rounded-full w-14 h-14 p-0 shadow-elevated",
-              showAddTask && "rotate-45"
+              "rounded-full h-14 px-6 shadow-elevated gap-2",
+              showAddTask && "rotate-0"
             )}
           >
-            {showAddTask ? <X className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+            {showAddTask ? (
+              <>
+                <X className="w-5 h-5" />
+                {t('voice.cancelBtn')}
+              </>
+            ) : (
+              <>
+                <Plus className="w-5 h-5" />
+                {t('addTask.submit')}
+              </>
+            )}
           </Button>
         </div>
+
+        {/* Mobile Search Bar */}
+        <MobileSearchBar value={searchQuery} onChange={setSearchQuery} />
 
         {/* Pomodoro Timer Modal */}
         {activePomodoro && (
@@ -236,11 +307,4 @@ export default function Dashboard() {
       </main>
     </div>
   );
-}
-
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
 }

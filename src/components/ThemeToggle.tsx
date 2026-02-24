@@ -24,7 +24,7 @@ export function ThemeToggle() {
       size="icon"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={cn(
-        "fixed bottom-6 left-6 z-40 rounded-full w-12 h-12 shadow-elevated",
+        "fixed bottom-16 sm:bottom-6 left-6 z-40 rounded-full w-10 h-10 shadow-elevated",
         "bg-card border-border hover:bg-accent hover:border-primary/30",
         "transition-all duration-300 ease-out",
         "hover:scale-105 active:scale-95"
@@ -32,9 +32,9 @@ export function ThemeToggle() {
       aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
     >
       {isDark ? (
-        <Sun className="h-5 w-5 text-accent transition-transform duration-300 rotate-0" />
+        <Sun className="h-4 w-4 text-accent transition-transform duration-300 rotate-0" />
       ) : (
-        <Moon className="h-5 w-5 text-primary transition-transform duration-300 rotate-0" />
+        <Moon className="h-4 w-4 text-primary transition-transform duration-300 rotate-0" />
       )}
     </Button>
   );

@@ -1,6 +1,7 @@
 import { Task, Difficulty, TaskStatus } from '@/types/focusflow';
+import { useLanguage } from '@/hooks/useLanguage';
 import { cn } from '@/lib/utils';
-import { Clock, Zap, Play, Check, Trash2 } from 'lucide-react';
+import { Clock, Zap, Play, Check, Trash2, Undo2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface TaskCardProps {
@@ -11,13 +12,15 @@ interface TaskCardProps {
   isDragging?: boolean;
 }
 
-const difficultyConfig: Record<Difficulty, { label: string; className: string; icon: string }> = {
-  low: { label: 'Easy', className: 'difficulty-low', icon: '🌱' },
-  medium: { label: 'Medium', className: 'difficulty-medium', icon: '🌿' },
-  high: { label: 'Hard', className: 'difficulty-high', icon: '🌳' },
-};
-
 export function TaskCard({ task, onStartPomodoro, onUpdateStatus, onDelete, isDragging }: TaskCardProps) {
+  const { t } = useLanguage();
+
+  const difficultyConfig: Record<Difficulty, { label: string; className: string; icon: string }> = {
+    low: { label: t('task.easy'), className: 'difficulty-low', icon: '🌱' },
+    medium: { label: t('task.medium'), className: 'difficulty-medium', icon: '🌿' },
+    high: { label: t('task.hard'), className: 'difficulty-high', icon: '🌳' },
+  };
+
   const difficulty = difficultyConfig[task.difficulty];
   const progress = task.pomodoroSessions > 0 
     ? (task.completedPomodoros / task.pomodoroSessions) * 100 
@@ -80,7 +83,7 @@ export function TaskCard({ task, onStartPomodoro, onUpdateStatus, onDelete, isDr
             onClick={() => onUpdateStatus('in-progress')}
             className="flex-1"
           >
-            Start Task
+            {t('task.start')}
           </Button>
         )}
         
@@ -93,7 +96,7 @@ export function TaskCard({ task, onStartPomodoro, onUpdateStatus, onDelete, isDr
               className="flex-1"
             >
               <Play className="w-4 h-4" />
-              Focus
+              {t('task.focus')}
             </Button>
             {onUpdateStatus && (
               <Button
@@ -107,19 +110,30 @@ export function TaskCard({ task, onStartPomodoro, onUpdateStatus, onDelete, isDr
           </>
         )}
 
-        {task.status === 'completed' && (
-          <div className="flex items-center gap-2 text-ff-balanced">
-            <Check className="w-4 h-4" />
-            <span className="text-sm font-medium">Completed!</span>
+        {task.status === 'completed' && onUpdateStatus && (
+          <div className="flex items-center gap-2 w-full">
+            <div className="flex items-center gap-2 text-ff-balanced flex-1">
+              <Check className="w-4 h-4" />
+              <span className="text-sm font-medium">{t('task.completed')}</span>
+            </div>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => onUpdateStatus('pending')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Undo2 className="w-4 h-4" />
+              <span className="text-xs ml-1">{t('task.undo')}</span>
+            </Button>
           </div>
         )}
 
-        {task.status !== 'completed' && onDelete && (
+        {onDelete && (
           <Button
             size="icon"
             variant="ghost"
             onClick={onDelete}
-            className="text-muted-foreground hover:text-destructive"
+            className="text-muted-foreground hover:text-destructive shrink-0"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
