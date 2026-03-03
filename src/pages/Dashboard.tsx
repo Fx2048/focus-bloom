@@ -8,6 +8,7 @@ import { useBadges } from '@/hooks/useBadges';
 import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
 import { useMoodCalculator } from '@/hooks/useMoodCalculator';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Header } from '@/components/Header';
 import { BurnoutMeter } from '@/components/BurnoutMeter';
 import { MotivationSlider } from '@/components/MotivationSlider';
