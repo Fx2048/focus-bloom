@@ -46,7 +46,9 @@ export default function Dashboard() {
   const { completedWorkSessions, createSession, completeSession } = usePomodoroSessions();
   const { suggestedMood } = useMoodCalculator({ tasks, completedWorkSessions });
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { showOnboarding, markOnboardingDone } = useOnboarding();
+  const { enabled: notifEnabled, permission: notifPermission, toggleEnabled: toggleNotif, requestPermission: requestNotifPermission } = useNotifications(tasks);
   
   const [showAddTask, setShowAddTask] = useState(false);
   const [activePomodoro, setActivePomodoro] = useState<{ taskId: string; taskName: string } | null>(null);
