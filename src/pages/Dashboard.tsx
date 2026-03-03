@@ -8,6 +8,7 @@ import { useBadges } from '@/hooks/useBadges';
 import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
 import { useMoodCalculator } from '@/hooks/useMoodCalculator';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Header } from '@/components/Header';
 import { BurnoutMeter } from '@/components/BurnoutMeter';
 import { MotivationSlider } from '@/components/MotivationSlider';
@@ -20,11 +21,13 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { CalendarPanel } from '@/components/CalendarPanel';
 import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { MobileSearchBar } from '@/components/MobileSearchBar';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search } from 'lucide-react';
+import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 
 export default function Dashboard() {
@@ -43,7 +46,9 @@ export default function Dashboard() {
   const { completedWorkSessions, createSession, completeSession } = usePomodoroSessions();
   const { suggestedMood } = useMoodCalculator({ tasks, completedWorkSessions });
   const { t } = useLanguage();
+  const navigate = useNavigate();
   const { showOnboarding, markOnboardingDone } = useOnboarding();
+  const { enabled: notifEnabled, permission: notifPermission, toggleEnabled: toggleNotif, requestPermission: requestNotifPermission } = useNotifications(tasks);
   
   const [showAddTask, setShowAddTask] = useState(false);
   const [activePomodoro, setActivePomodoro] = useState<{ taskId: string; taskName: string } | null>(null);
@@ -211,11 +216,31 @@ export default function Dashboard() {
               />
             )}
 
-            {/* Calendar Panel - inline for summary */}
+            {/* Notifications */}
+            <NotificationSettings
+              enabled={notifEnabled}
+              permission={notifPermission}
+              onToggle={toggleNotif}
+              onRequestPermission={requestNotifPermission}
+            />
+
+            {/* Calendar Panel */}
             <CalendarPanel 
               tasks={filteredTasks} 
               onTaskClick={(task) => setEditingTask(task)} 
             />
+
+            {/* Analytics Link */}
+            {!isGuest && (
+              <Button
+                variant="outline"
+                className="w-full gap-2 rounded-xl h-12"
+                onClick={() => navigate('/analytics')}
+              >
+                <BarChart3 className="w-4 h-4" />
+                {t('analytics.viewAll')}
+              </Button>
+            )}
           </TabsContent>
 
           {/* ===== TAB: TASKS ===== */}

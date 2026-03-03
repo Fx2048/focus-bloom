@@ -1,141 +1,123 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { toast } from 'sonner';
+import type { Task } from '@/types/focusflow';
 
-interface ScheduledNotification {
-  id: string;
-  title: string;
-  body: string;
-  scheduledTime: Date;
-  timeoutId?: NodeJS.Timeout;
-}
+type NotifPermission = 'granted' | 'denied' | 'default';
 
-export function useNotifications() {
-  const notificationsRef = useRef<Map<string, ScheduledNotification>>(new Map());
-  const permissionRef = useRef<NotificationPermission>('default');
+export function useNotifications(tasks: Task[] = []) {
+  const [permission, setPermission] = useState<NotifPermission>('default');
+  const [enabled, setEnabled] = useState(() => localStorage.getItem('tizza-notifications') === 'true');
+  const notifiedTasksRef = useRef<Set<string>>(new Set());
+  const breakReminderRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const morningShownRef = useRef(false);
 
-  // Check and request permission
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermission(Notification.permission as NotifPermission);
+    }
+  }, []);
+
   const requestPermission = useCallback(async () => {
     if (!('Notification' in window)) {
-      console.warn('Notifications not supported');
+      toast.error('Tu navegador no soporta notificaciones');
       return false;
     }
-
-    if (Notification.permission === 'granted') {
-      permissionRef.current = 'granted';
+    const result = await Notification.requestPermission();
+    setPermission(result as NotifPermission);
+    if (result === 'granted') {
+      setEnabled(true);
+      localStorage.setItem('tizza-notifications', 'true');
+      toast.success('¡Notificaciones activadas!');
       return true;
     }
-
-    if (Notification.permission !== 'denied') {
-      const permission = await Notification.requestPermission();
-      permissionRef.current = permission;
-      return permission === 'granted';
-    }
-
+    toast.error('Permiso de notificaciones denegado');
     return false;
   }, []);
 
-  // Show notification immediately
-  const showNotification = useCallback((title: string, body: string, options?: NotificationOptions) => {
-    if (permissionRef.current !== 'granted') {
-      // Fallback to toast
-      toast(title, { description: body });
-      return;
+  const toggleEnabled = useCallback(() => {
+    const newState = !enabled;
+    setEnabled(newState);
+    localStorage.setItem('tizza-notifications', String(newState));
+    if (newState && permission !== 'granted') {
+      requestPermission();
     }
+  }, [enabled, permission, requestPermission]);
 
+  const sendNotification = useCallback((title: string, body: string) => {
+    if (!enabled || permission !== 'granted') return;
     try {
-      const notification = new Notification(title, {
-        body,
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        tag: `focusflow-${Date.now()}`,
-        ...options,
-      });
-
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-
-      // Also show as toast for in-app visibility
-      toast(title, { description: body });
-    } catch (e) {
-      console.error('Failed to show notification:', e);
+      new Notification(title, { body, icon: '/favicon.ico', tag: `tizza-${Date.now()}` });
+    } catch {
       toast(title, { description: body });
     }
-  }, []);
+  }, [enabled, permission]);
 
-  // Schedule notification for a specific time
-  const scheduleNotification = useCallback((
-    id: string,
-    title: string,
-    body: string,
-    scheduledTime: Date,
-    reminderMinutes: number = 10
-  ) => {
-    const now = new Date();
-    const reminderTime = new Date(scheduledTime.getTime() - reminderMinutes * 60 * 1000);
-    const delay = reminderTime.getTime() - now.getTime();
-
-    if (delay <= 0) {
-      // Already past the reminder time
-      return null;
-    }
-
-    // Clear any existing notification with this ID
-    cancelNotification(id);
-
-    const timeoutId = setTimeout(() => {
-      showNotification(
-        `⏰ ${title}`,
-        `${body} - en ${reminderMinutes} minutos`
-      );
-      notificationsRef.current.delete(id);
-    }, delay);
-
-    const notification: ScheduledNotification = {
-      id,
-      title,
-      body,
-      scheduledTime,
-      timeoutId,
-    };
-
-    notificationsRef.current.set(id, notification);
-    return notification;
-  }, [showNotification]);
-
-  // Cancel a scheduled notification
-  const cancelNotification = useCallback((id: string) => {
-    const notification = notificationsRef.current.get(id);
-    if (notification?.timeoutId) {
-      clearTimeout(notification.timeoutId);
-      notificationsRef.current.delete(id);
-    }
-  }, []);
-
-  // Cleanup on unmount
+  // Task reminders (10 min before)
   useEffect(() => {
-    return () => {
-      notificationsRef.current.forEach((notification) => {
-        if (notification.timeoutId) {
-          clearTimeout(notification.timeoutId);
+    if (!enabled || !tasks.length) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      tasks.filter(t => t.status !== 'completed').forEach(task => {
+        const scheduled = new Date(task.scheduledDay);
+        scheduled.setHours(9, 0, 0, 0);
+        const diffMin = (scheduled.getTime() - now.getTime()) / 60000;
+        if (diffMin > 0 && diffMin <= 10 && !notifiedTasksRef.current.has(task.id)) {
+          notifiedTasksRef.current.add(task.id);
+          sendNotification('⏰ Tarea próxima', `"${task.name}" comienza en ${Math.round(diffMin)} min`);
         }
       });
-      notificationsRef.current.clear();
-    };
-  }, []);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [enabled, tasks, sendNotification]);
 
-  // Request permission on mount
+  // Morning summary
   useEffect(() => {
-    requestPermission();
-  }, [requestPermission]);
+    if (!enabled || morningShownRef.current) return;
+    const check = () => {
+      const now = new Date();
+      if (now.getHours() === 8 && now.getMinutes() < 5 && !morningShownRef.current) {
+        morningShownRef.current = true;
+        const pending = tasks.filter(t => t.status !== 'completed').length;
+        if (pending > 0) {
+          sendNotification('🌅 Buenos días', `Tienes ${pending} tarea${pending > 1 ? 's' : ''} pendiente${pending > 1 ? 's' : ''} hoy.`);
+        }
+      }
+    };
+    const interval = setInterval(check, 60000);
+    check();
+    return () => clearInterval(interval);
+  }, [enabled, tasks, sendNotification]);
+
+  // Break reminder
+  const startBreakReminder = useCallback((pomodoroCount: number) => {
+    if (!enabled) return;
+    if (breakReminderRef.current) clearTimeout(breakReminderRef.current);
+    if (pomodoroCount >= 3) {
+      breakReminderRef.current = setTimeout(() => {
+        sendNotification('🧘 Momento de descanso', `Llevas ${pomodoroCount} sesiones seguidas. Tu bienestar importa.`);
+      }, 5 * 60 * 1000);
+    }
+  }, [enabled, sendNotification]);
+
+  // Legacy API compatibility
+  const showNotification = sendNotification;
+  const scheduleNotification = useCallback((_id: string, title: string, body: string) => {
+    sendNotification(title, body);
+    return null;
+  }, [sendNotification]);
+  const cancelNotification = useCallback((_id: string) => {}, []);
 
   return {
+    permission,
+    enabled,
     requestPermission,
+    toggleEnabled,
+    sendNotification,
+    startBreakReminder,
+    // Legacy API
     showNotification,
     scheduleNotification,
     cancelNotification,
     isSupported: typeof window !== 'undefined' && 'Notification' in window,
-    permission: permissionRef.current,
   };
 }

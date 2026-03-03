@@ -179,9 +179,7 @@ export function VoiceCommandButton({ onTaskCreate }: VoiceCommandButtonProps) {
           scheduleNotification(
             notificationId,
             `📅 ${editedTitle || parsedCommand.title}`,
-            `Recordatorio: ${parsedCommand.description}`,
-            taskDate,
-            10 // 10 minutes before
+            `Recordatorio: ${parsedCommand.description}`
           );
           toast.success('✅ Tarea creada con recordatorio');
         } catch (notifError) {
