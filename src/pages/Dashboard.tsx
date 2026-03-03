@@ -216,11 +216,31 @@ export default function Dashboard() {
               />
             )}
 
-            {/* Calendar Panel - inline for summary */}
+            {/* Notifications */}
+            <NotificationSettings
+              enabled={notifEnabled}
+              permission={notifPermission}
+              onToggle={toggleNotif}
+              onRequestPermission={requestNotifPermission}
+            />
+
+            {/* Calendar Panel */}
             <CalendarPanel 
               tasks={filteredTasks} 
               onTaskClick={(task) => setEditingTask(task)} 
             />
+
+            {/* Analytics Link */}
+            {!isGuest && (
+              <Button
+                variant="outline"
+                className="w-full gap-2 rounded-xl h-12"
+                onClick={() => navigate('/analytics')}
+              >
+                <BarChart3 className="w-4 h-4" />
+                {t('analytics.viewAll')}
+              </Button>
+            )}
           </TabsContent>
 
           {/* ===== TAB: TASKS ===== */}
