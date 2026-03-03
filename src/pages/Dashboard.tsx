@@ -21,6 +21,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { CalendarPanel } from '@/components/CalendarPanel';
 import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { MobileSearchBar } from '@/components/MobileSearchBar';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
