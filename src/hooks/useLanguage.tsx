@@ -168,6 +168,27 @@ const translations: Record<string, Record<Language, string>> = {
   'pomodoro.burnoutWarning': { es: '⚠️ Has trabajado mucho. Toma este descanso para evitar burnout.', en: '⚠️ You\'ve been working hard! Please take this break.' },
   'pomodoro.skipWarning': { es: 'Saltar muchos descansos aumenta el riesgo de burnout', en: 'Skipping too many breaks increases burnout risk' },
   'pomodoro.completed': { es: 'completados', en: 'completed' },
+
+  // Analytics
+  'analytics.title': { es: 'Analíticas', en: 'Analytics' },
+  'analytics.weekly': { es: 'Semanal', en: 'Weekly' },
+  'analytics.monthly': { es: 'Mensual', en: 'Monthly' },
+  'analytics.pomodoros': { es: 'Pomodoros', en: 'Pomodoros' },
+  'analytics.tasksCompleted': { es: 'Tareas completadas', en: 'Tasks completed' },
+  'analytics.avgMood': { es: 'Ánimo promedio', en: 'Avg. Mood' },
+  'analytics.skippedBreaks': { es: 'Descansos saltados', en: 'Skipped Breaks' },
+  'analytics.pomodoroTrend': { es: 'Tendencia de Pomodoros', en: 'Pomodoro Trend' },
+  'analytics.tasksTrend': { es: 'Tareas Completadas', en: 'Tasks Completed' },
+  'analytics.moodTrend': { es: 'Tendencia de Ánimo', en: 'Mood Trend' },
+  'analytics.burnoutTrend': { es: 'Indicador de Burnout', en: 'Burnout Indicator' },
+  'analytics.viewAll': { es: 'Ver analíticas', en: 'View Analytics' },
+
+  // Notifications
+  'notifications.title': { es: 'Notificaciones', en: 'Notifications' },
+  'notifications.description': { es: 'Recordatorios inteligentes para mantenerte al día', en: 'Smart reminders to keep you on track' },
+  'notifications.taskReminder': { es: '10 min antes de tarea programada', en: '10 min before scheduled task' },
+  'notifications.morningSummary': { es: 'Resumen matutino a las 8:00', en: 'Morning summary at 8:00 AM' },
+  'notifications.breakReminder': { es: 'Recordatorio de descanso', en: 'Break reminder' },
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
