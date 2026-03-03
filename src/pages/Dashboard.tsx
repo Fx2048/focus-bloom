@@ -25,8 +25,9 @@ import { NotificationSettings } from '@/components/NotificationSettings';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search } from 'lucide-react';
+import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 
 export default function Dashboard() {
