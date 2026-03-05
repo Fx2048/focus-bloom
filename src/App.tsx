@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
