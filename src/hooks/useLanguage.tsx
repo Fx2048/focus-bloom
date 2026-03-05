@@ -123,7 +123,8 @@ const translations: Record<string, Record<Language, string>> = {
   'login.burnoutPrevention': { es: 'Prevención de burnout', en: 'Burnout prevention' },
   'login.mentalHealth': { es: 'Bienestar emocional', en: 'Mental health first' },
   'login.agreement': { es: 'Al continuar, aceptas enfocarte en tu bienestar 💚', en: 'By continuing, you agree to focus on your wellbeing 💚' },
-  
+  'login.privacyLink': { es: 'Política de Privacidad', en: 'Privacy Policy' },
+
   // Voice
   'voice.listening': { es: 'Escuchando...', en: 'Listening...' },
   'voice.processing': { es: 'Procesando...', en: 'Processing...' },

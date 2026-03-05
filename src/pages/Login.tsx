@@ -184,7 +184,10 @@ export default function Login() {
         </div>
 
         <p className="text-xs text-muted-foreground text-center mt-6 max-w-xs">
-          {t('login.agreement')}
+          {t('login.agreement')}{' '}
+          <a href="/privacy" className="underline hover:text-primary transition-colors">
+            {t('login.privacyLink')}
+          </a>
         </p>
       </div>
 
