@@ -22,6 +22,7 @@ import { CalendarPanel } from '@/components/CalendarPanel';
 import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { MobileSearchBar } from '@/components/MobileSearchBar';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { GoogleCalendarSync } from '@/components/GoogleCalendarSync';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -215,6 +216,9 @@ export default function Dashboard() {
                 onStartTask={handleStartPomodoro}
               />
             )}
+
+            {/* Google Calendar Sync */}
+            {!isGuest && <GoogleCalendarSync />}
 
             {/* Notifications */}
             <NotificationSettings
