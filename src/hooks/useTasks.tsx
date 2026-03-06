@@ -4,6 +4,17 @@ import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import type { Task, Difficulty, TaskStatus } from '@/types/focusflow';
 
+async function syncCalendarEvent(action: 'create' | 'update' | 'delete', taskId: string, googleCalendarEventId?: string) {
+  try {
+    await supabase.functions.invoke('google-calendar-event', {
+      body: { action, taskId, googleCalendarEventId },
+    });
+  } catch (e) {
+    // Silent fail — calendar sync is best-effort
+    console.warn('Calendar sync failed:', e);
+  }
+}
+
 export function useTasks() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -32,6 +43,7 @@ export function useTasks() {
         completedPomodoros: t.completed_pomodoros,
         createdAt: new Date(t.created_at),
         completedAt: t.completed_at ? new Date(t.completed_at) : undefined,
+        googleCalendarEventId: t.google_calendar_event_id ?? undefined,
       })) as Task[];
     },
     enabled: !!user,
@@ -43,7 +55,7 @@ export function useTasks() {
       
       const pomodoroSessions = Math.ceil(taskData.estimatedHours * 60 / 25);
       
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('tasks')
         .insert({
           user_id: user.id,
@@ -52,13 +64,18 @@ export function useTasks() {
           estimated_hours: taskData.estimatedHours,
           scheduled_day: taskData.scheduledDay.toISOString().split('T')[0],
           pomodoro_sessions: pomodoroSessions,
-        });
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+      return data.id;
     },
-    onSuccess: () => {
+    onSuccess: (taskId) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success('Task added!');
+      // Auto-sync to Google Calendar
+      syncCalendarEvent('create', taskId);
     },
     onError: (error) => {
       toast.error('Failed to add task: ' + error.message);
@@ -78,9 +95,12 @@ export function useTasks() {
         .eq('id', taskId);
 
       if (error) throw error;
+      return taskId;
     },
-    onSuccess: () => {
+    onSuccess: (taskId) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      // Auto-sync status change to Google Calendar
+      syncCalendarEvent('update', taskId);
     },
     onError: (error) => {
       toast.error('Failed to update task: ' + error.message);
@@ -121,10 +141,13 @@ export function useTasks() {
         .eq('id', taskId);
 
       if (error) throw error;
+      return taskId;
     },
-    onSuccess: () => {
+    onSuccess: (taskId) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success('Tarea actualizada');
+      // Auto-sync update to Google Calendar
+      syncCalendarEvent('update', taskId);
     },
     onError: (error) => {
       toast.error('Error al actualizar tarea: ' + error.message);
@@ -133,16 +156,25 @@ export function useTasks() {
 
   const deleteTaskMutation = useMutation({
     mutationFn: async (taskId: string) => {
+      // Get the task's Google Calendar event ID before deleting
+      const task = tasks.find(t => t.id === taskId);
+      const googleCalendarEventId = task?.googleCalendarEventId;
+
       const { error } = await supabase
         .from('tasks')
         .delete()
         .eq('id', taskId);
 
       if (error) throw error;
+      return { taskId, googleCalendarEventId };
     },
-    onSuccess: () => {
+    onSuccess: ({ taskId, googleCalendarEventId }) => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast.success('Tarea eliminada');
+      // Auto-delete from Google Calendar
+      if (googleCalendarEventId) {
+        syncCalendarEvent('delete', taskId, googleCalendarEventId);
+      }
     },
     onError: (error) => {
       toast.error('Error al eliminar tarea: ' + error.message);

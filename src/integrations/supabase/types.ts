@@ -167,6 +167,7 @@ export type Database = {
           created_at: string
           difficulty: Database["public"]["Enums"]["task_difficulty"]
           estimated_hours: number
+          google_calendar_event_id: string | null
           id: string
           name: string
           pomodoro_sessions: number
@@ -180,6 +181,7 @@ export type Database = {
           created_at?: string
           difficulty?: Database["public"]["Enums"]["task_difficulty"]
           estimated_hours: number
+          google_calendar_event_id?: string | null
           id?: string
           name: string
           pomodoro_sessions?: number
@@ -193,6 +195,7 @@ export type Database = {
           created_at?: string
           difficulty?: Database["public"]["Enums"]["task_difficulty"]
           estimated_hours?: number
+          google_calendar_event_id?: string | null
           id?: string
           name?: string
           pomodoro_sessions?: number
