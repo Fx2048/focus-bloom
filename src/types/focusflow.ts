@@ -13,6 +13,7 @@ export interface Task {
   completedPomodoros: number;
   createdAt: Date;
   completedAt?: Date;
+  googleCalendarEventId?: string;
 }
 
 export interface PomodoroSession {
