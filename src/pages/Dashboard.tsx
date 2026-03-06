@@ -217,6 +217,9 @@ export default function Dashboard() {
               />
             )}
 
+            {/* Google Calendar Sync */}
+            {!isGuest && <GoogleCalendarSync />}
+
             {/* Notifications */}
             <NotificationSettings
               enabled={notifEnabled}
