@@ -33,6 +33,12 @@ export default function Gamification() {
 
   return (
     <div className="min-h-screen bg-background">
+      {showTutorialModal && (
+        <GamificationTutorial onComplete={() => {
+          markTutorialDone();
+          setShowTutorialModal(false);
+        }} />
+      )}
       <Header />
       <main className="container px-4 py-6 pb-20 max-w-3xl mx-auto space-y-5">
         <div className="flex items-center gap-3">
