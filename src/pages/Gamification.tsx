@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { LevelProgress } from '@/components/LevelProgress';
 import { Leaderboard } from '@/components/Leaderboard';
 import { ChallengesList } from '@/components/ChallengesList';
 import { PointsBadges } from '@/components/PointsBadges';
+import { GamificationTutorial, useGamificationTutorial } from '@/components/GamificationTutorial';
 import { useBadges } from '@/hooks/useBadges';
 import { useProfile } from '@/hooks/useProfile';
 import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
@@ -19,6 +21,8 @@ export default function Gamification() {
   const { profile } = useProfile();
   const { completedWorkSessions } = usePomodoroSessions();
   const { tasks } = useTasks();
+  const { showTutorial, markTutorialDone } = useGamificationTutorial();
+  const [showTutorialModal, setShowTutorialModal] = useState(showTutorial);
 
   const completedToday = tasks.filter(t => t.status === 'completed').length;
 
@@ -29,6 +33,12 @@ export default function Gamification() {
 
   return (
     <div className="min-h-screen bg-background">
+      {showTutorialModal && (
+        <GamificationTutorial onComplete={() => {
+          markTutorialDone();
+          setShowTutorialModal(false);
+        }} />
+      )}
       <Header />
       <main className="container px-4 py-6 pb-20 max-w-3xl mx-auto space-y-5">
         <div className="flex items-center gap-3">
