@@ -235,16 +235,28 @@ export default function Dashboard() {
               onTaskClick={(task) => setEditingTask(task)} 
             />
 
-            {/* Analytics Link */}
+            {/* Level Progress */}
+            {!isGuest && <LevelProgress />}
+
+            {/* Analytics & Gamification Links */}
             {!isGuest && (
-              <Button
-                variant="outline"
-                className="w-full gap-2 rounded-xl h-12"
-                onClick={() => navigate('/analytics')}
-              >
-                <BarChart3 className="w-4 h-4" />
-                {t('analytics.viewAll')}
-              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  variant="outline"
+                  className="gap-2 rounded-xl h-12"
+                  onClick={() => navigate('/analytics')}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  {t('analytics.viewAll')}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2 rounded-xl h-12"
+                  onClick={() => navigate('/gamification')}
+                >
+                  🏆 Gamificación
+                </Button>
+              </div>
             )}
           </TabsContent>
 
