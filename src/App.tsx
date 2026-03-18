@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
+import Gamification from "./pages/Gamification";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Index />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/gamification" element={<Gamification />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/api/auth/google/callback" element={<GoogleOAuthCallback />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

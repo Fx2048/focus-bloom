@@ -30,6 +30,7 @@ import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search, BarChart3 } from '
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
+import { LevelProgress } from '@/components/LevelProgress';
 
 export default function Dashboard() {
   const { user } = useAuth();

@@ -103,18 +103,19 @@ export function useChallenges() {
       if (error) throw error;
 
       if (completed && challenge) {
-        // Award XP
-        await supabase.rpc('increment_xp' as never, { p_user_id: user.id, p_amount: challenge.xpReward } as never)
-          .then(() => {})
-          .catch(() => {
-            // Fallback: update directly
-            supabase.from('profiles').select('xp').eq('user_id', user.id).single()
-              .then(({ data }) => {
-                if (data) {
-                  supabase.from('profiles').update({ xp: (data.xp || 0) + challenge.xpReward }).eq('user_id', user.id);
-                }
-              });
-          });
+        // Award XP - update directly
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('xp')
+          .eq('user_id', user.id)
+          .single();
+
+        if (profileData) {
+          await supabase
+            .from('profiles')
+            .update({ xp: ((profileData as any).xp || 0) + challenge.xpReward })
+            .eq('user_id', user.id);
+        }
         toast.success(`🎉 ¡Reto completado! +${challenge.xpReward} XP`);
       }
     },
