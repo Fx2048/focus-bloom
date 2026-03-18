@@ -21,6 +21,8 @@ export default function Gamification() {
   const { profile } = useProfile();
   const { completedWorkSessions } = usePomodoroSessions();
   const { tasks } = useTasks();
+  const { showTutorial, markTutorialDone } = useGamificationTutorial();
+  const [showTutorialModal, setShowTutorialModal] = useState(showTutorial);
 
   const completedToday = tasks.filter(t => t.status === 'completed').length;
 
