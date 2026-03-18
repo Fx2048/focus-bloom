@@ -35,6 +35,83 @@ export type Database = {
         }
         Relationships: []
       }
+      challenge_participants: {
+        Row: {
+          challenge_id: string
+          completed: boolean
+          completed_at: string | null
+          id: string
+          joined_at: string
+          progress: number
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          joined_at?: string
+          progress?: number
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          id?: string
+          joined_at?: string
+          progress?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string
+          description: string
+          ends_at: string
+          icon: string
+          id: string
+          starts_at: string
+          target_value: number
+          title: string
+          xp_reward: number
+        }
+        Insert: {
+          challenge_type?: string
+          created_at?: string
+          description: string
+          ends_at: string
+          icon?: string
+          id?: string
+          starts_at?: string
+          target_value?: number
+          title: string
+          xp_reward?: number
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string
+          description?: string
+          ends_at?: string
+          icon?: string
+          id?: string
+          starts_at?: string
+          target_value?: number
+          title?: string
+          xp_reward?: number
+        }
+        Relationships: []
+      }
       daily_logs: {
         Row: {
           created_at: string
@@ -135,28 +212,46 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_emoji: string | null
           created_at: string
+          display_name: string | null
           id: string
+          last_active_date: string | null
+          level: number
           max_daily_hours: number
+          streak_days: number
           total_points: number
           updated_at: string
           user_id: string
+          xp: number
         }
         Insert: {
+          avatar_emoji?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
+          last_active_date?: string | null
+          level?: number
           max_daily_hours?: number
+          streak_days?: number
           total_points?: number
           updated_at?: string
           user_id: string
+          xp?: number
         }
         Update: {
+          avatar_emoji?: string | null
           created_at?: string
+          display_name?: string | null
           id?: string
+          last_active_date?: string | null
+          level?: number
           max_daily_hours?: number
+          streak_days?: number
           total_points?: number
           updated_at?: string
           user_id?: string
+          xp?: number
         }
         Relationships: []
       }
