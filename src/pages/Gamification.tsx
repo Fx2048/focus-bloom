@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Header } from '@/components/Header';
 import { LevelProgress } from '@/components/LevelProgress';
 import { Leaderboard } from '@/components/Leaderboard';
 import { ChallengesList } from '@/components/ChallengesList';
 import { PointsBadges } from '@/components/PointsBadges';
+import { GamificationTutorial, useGamificationTutorial } from '@/components/GamificationTutorial';
 import { useBadges } from '@/hooks/useBadges';
 import { useProfile } from '@/hooks/useProfile';
 import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
