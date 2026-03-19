@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
 import Gamification from "./pages/Gamification";
+import Mentoring from "./pages/Mentoring";
 
 const queryClient = new QueryClient();
 
