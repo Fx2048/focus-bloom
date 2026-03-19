@@ -32,6 +32,7 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/gamification" element={<Gamification />} />
+                <Route path="/mentoring" element={<Mentoring />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/api/auth/google/callback" element={<GoogleOAuthCallback />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
