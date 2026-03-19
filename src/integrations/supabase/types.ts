@@ -169,6 +169,150 @@ export type Database = {
         }
         Relationships: []
       }
+      mentoring_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          relationship_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          relationship_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          relationship_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentoring_messages_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "mentoring_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentoring_projects: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          relationship_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          relationship_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          relationship_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentoring_projects_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "mentoring_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentoring_relationships: {
+        Row: {
+          created_at: string
+          id: string
+          mentee_id: string
+          mentor_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentee_id: string
+          mentor_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentee_id?: string
+          mentor_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      mentoring_sessions: {
+        Row: {
+          created_at: string
+          created_by: string
+          duration_minutes: number
+          id: string
+          jitsi_room_name: string
+          notes: string | null
+          relationship_id: string
+          scheduled_at: string
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          duration_minutes?: number
+          id?: string
+          jitsi_room_name: string
+          notes?: string | null
+          relationship_id: string
+          scheduled_at: string
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number
+          id?: string
+          jitsi_room_name?: string
+          notes?: string | null
+          relationship_id?: string
+          scheduled_at?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentoring_sessions_relationship_id_fkey"
+            columns: ["relationship_id"]
+            isOneToOne: false
+            referencedRelation: "mentoring_relationships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pomodoro_sessions: {
         Row: {
           completed: boolean
