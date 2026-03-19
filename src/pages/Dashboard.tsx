@@ -256,6 +256,13 @@ export default function Dashboard() {
                 >
                   🏆 Gamificación
                 </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2 rounded-xl h-12"
+                  onClick={() => navigate('/mentoring')}
+                >
+                  👥 Mentoring
+                </Button>
               </div>
             )}
           </TabsContent>
