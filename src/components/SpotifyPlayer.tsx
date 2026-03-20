@@ -2,10 +2,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Music, Link2, Unlink, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { Music, Link2, Unlink, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Loader2, Library } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+const STUDY_PLAYLISTS = [
+  { uri: 'spotify:playlist:37i9dQZF1DWZeKCadgRdKQ', name: 'Deep Focus', emoji: '🧠' },
+  { uri: 'spotify:playlist:37i9dQZF1DWWQRwui0ExPn', name: 'Lo-Fi Beats', emoji: '🎧' },
+  { uri: 'spotify:playlist:37i9dQZF1DWV0gynK7G6pD', name: 'Clásica', emoji: '🎻' },
+  { uri: 'spotify:playlist:37i9dQZF1DX4PP3DA4J0N8', name: 'Naturaleza', emoji: '🌿' },
+  { uri: 'spotify:playlist:37i9dQZF1DX8Uebhn9wzrS', name: 'Chill Study', emoji: '☕' },
+];
 
 const SPOTIFY_CLIENT_ID = '/* set at connect time */';
 const REDIRECT_URI = 'https://tizzaai.lovable.app/api/auth/spotify/callback';
@@ -219,26 +227,25 @@ export function SpotifyPlayer() {
     }
   };
 
-  // Play a focus playlist
-  const playFocusPlaylist = async () => {
-    if (!deviceId) return;
+  const playPlaylist = async (contextUri: string) => {
+    if (!deviceId) {
+      toast.error('Reproductor no listo, espera un momento');
+      return;
+    }
     try {
       const { data } = await supabase.functions.invoke('spotify-refresh');
       if (!data?.access_token) return;
 
-      // Spotify's official "Focus" playlist
       await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${data.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          context_uri: 'spotify:playlist:37i9dQZF1DWZeKCadgRdKQ', // Deep Focus playlist
-        }),
+        body: JSON.stringify({ context_uri: contextUri }),
       });
     } catch (err) {
-      console.error('Error playing focus playlist:', err);
+      console.error('Error playing playlist:', err);
     }
   };
 
@@ -277,12 +284,23 @@ export function SpotifyPlayer() {
               </div>
             </div>
           ) : (
-            <button
-              onClick={playFocusPlaylist}
-              className="w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-muted/50"
-            >
-              🎧 Reproducir playlist <span className="font-medium">Deep Focus</span>
-            </button>
+            <div className="space-y-1.5">
+              <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <Library className="w-3 h-3" /> Playlists de estudio
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {STUDY_PLAYLISTS.map((pl) => (
+                  <button
+                    key={pl.uri}
+                    onClick={() => playPlaylist(pl.uri)}
+                    className="text-left text-xs p-2 rounded-lg border border-border hover:bg-muted/60 active:scale-[0.97] transition-all"
+                  >
+                    <span className="block text-sm leading-none mb-0.5">{pl.emoji}</span>
+                    <span className="font-medium text-foreground truncate block">{pl.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {/* Controls */}
