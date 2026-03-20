@@ -302,7 +302,11 @@ export function SpotifyPlayer() {
               </div>
             </div>
           )}
-            </Button>
+
+          {/* Controls */}
+          <div className="flex items-center justify-center gap-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevTrack}>
+              <SkipBack className="w-4 h-4" />
             <Button
               variant="ghost"
               size="icon"
