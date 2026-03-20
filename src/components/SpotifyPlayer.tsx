@@ -227,26 +227,25 @@ export function SpotifyPlayer() {
     }
   };
 
-  // Play a focus playlist
-  const playFocusPlaylist = async () => {
-    if (!deviceId) return;
+  const playPlaylist = async (contextUri: string) => {
+    if (!deviceId) {
+      toast.error('Reproductor no listo, espera un momento');
+      return;
+    }
     try {
       const { data } = await supabase.functions.invoke('spotify-refresh');
       if (!data?.access_token) return;
 
-      // Spotify's official "Focus" playlist
       await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
         headers: {
           Authorization: `Bearer ${data.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          context_uri: 'spotify:playlist:37i9dQZF1DWZeKCadgRdKQ', // Deep Focus playlist
-        }),
+        body: JSON.stringify({ context_uri: contextUri }),
       });
     } catch (err) {
-      console.error('Error playing focus playlist:', err);
+      console.error('Error playing playlist:', err);
     }
   };
 
