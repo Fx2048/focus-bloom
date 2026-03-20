@@ -50,11 +50,11 @@ export function SpotifyPlayer() {
   // Check connection
   const checkConnection = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('spotify_tokens')
+    const { data } = await (supabase
+      .from('spotify_tokens' as any)
       .select('id')
       .eq('user_id', user.id)
-      .maybeSingle();
+      .maybeSingle() as any);
     setIsConnected(!!data);
     setIsLoading(false);
   }, [user]);
