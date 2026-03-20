@@ -36,6 +36,7 @@ const App = () => (
                 <Route path="/mentoring" element={<Mentoring />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/api/auth/google/callback" element={<GoogleOAuthCallback />} />
+                <Route path="/api/auth/spotify/callback" element={<SpotifyOAuthCallback />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

@@ -191,7 +191,7 @@ export function SpotifyPlayer() {
     playerRef.current?.disconnect();
     playerRef.current = null;
     setPlayer(null);
-    await supabase.from('spotify_tokens').delete().eq('user_id', user.id);
+    await (supabase.from('spotify_tokens' as any).delete().eq('user_id', user.id) as any);
     setIsConnected(false);
     setCurrentTrack(null);
     toast.success('Spotify desconectado');

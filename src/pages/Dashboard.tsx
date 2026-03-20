@@ -222,6 +222,9 @@ export default function Dashboard() {
             {/* Google Calendar Sync */}
             {!isGuest && <GoogleCalendarSync />}
 
+            {/* Spotify Player */}
+            {!isGuest && <SpotifyPlayer />}
+
             {/* Notifications */}
             <NotificationSettings
               enabled={notifEnabled}
