@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri: `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app') || 'https://tizzaai.lovable.app'}/api/auth/spotify/callback`,
+        redirect_uri: 'https://tizzaai.lovable.app/api/auth/spotify/callback',
       }),
     });
 
