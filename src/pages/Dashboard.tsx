@@ -23,6 +23,7 @@ import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { MobileSearchBar } from '@/components/MobileSearchBar';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { GoogleCalendarSync } from '@/components/GoogleCalendarSync';
+import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
