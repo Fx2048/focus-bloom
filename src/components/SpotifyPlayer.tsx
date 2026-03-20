@@ -284,18 +284,24 @@ export function SpotifyPlayer() {
               </div>
             </div>
           ) : (
-            <button
-              onClick={playFocusPlaylist}
-              className="w-full text-left text-sm text-muted-foreground hover:text-foreground transition-colors p-2 rounded-lg hover:bg-muted/50"
-            >
-              🎧 Reproducir playlist <span className="font-medium">Deep Focus</span>
-            </button>
+            <div className="space-y-1.5">
+              <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <Library className="w-3 h-3" /> Playlists de estudio
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {STUDY_PLAYLISTS.map((pl) => (
+                  <button
+                    key={pl.uri}
+                    onClick={() => playPlaylist(pl.uri)}
+                    className="text-left text-xs p-2 rounded-lg border border-border hover:bg-muted/60 active:scale-[0.97] transition-all"
+                  >
+                    <span className="block text-sm leading-none mb-0.5">{pl.emoji}</span>
+                    <span className="font-medium text-foreground truncate block">{pl.name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
-
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={prevTrack}>
-              <SkipBack className="w-4 h-4" />
             </Button>
             <Button
               variant="ghost"
