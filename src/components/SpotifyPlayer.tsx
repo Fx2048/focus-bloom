@@ -2,10 +2,18 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Music, Link2, Unlink, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Loader2 } from 'lucide-react';
+import { Music, Link2, Unlink, Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Loader2, Library } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+
+const STUDY_PLAYLISTS = [
+  { uri: 'spotify:playlist:37i9dQZF1DWZeKCadgRdKQ', name: 'Deep Focus', emoji: '🧠' },
+  { uri: 'spotify:playlist:37i9dQZF1DWWQRwui0ExPn', name: 'Lo-Fi Beats', emoji: '🎧' },
+  { uri: 'spotify:playlist:37i9dQZF1DWV0gynK7G6pD', name: 'Clásica', emoji: '🎻' },
+  { uri: 'spotify:playlist:37i9dQZF1DX4PP3DA4J0N8', name: 'Naturaleza', emoji: '🌿' },
+  { uri: 'spotify:playlist:37i9dQZF1DX8Uebhn9wzrS', name: 'Chill Study', emoji: '☕' },
+];
 
 const SPOTIFY_CLIENT_ID = '/* set at connect time */';
 const REDIRECT_URI = 'https://tizzaai.lovable.app/api/auth/spotify/callback';
