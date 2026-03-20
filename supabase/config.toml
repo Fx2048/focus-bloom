@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.google-calendar-event]
 verify_jwt = false
+
+[functions.spotify-callback]
+verify_jwt = false
+
+[functions.spotify-refresh]
+verify_jwt = false
+
+[functions.spotify-client-id]
+verify_jwt = false

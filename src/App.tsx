@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
+import SpotifyOAuthCallback from "./pages/SpotifyOAuthCallback";
 import Gamification from "./pages/Gamification";
 import Mentoring from "./pages/Mentoring";
 
@@ -35,6 +36,7 @@ const App = () => (
                 <Route path="/mentoring" element={<Mentoring />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/api/auth/google/callback" element={<GoogleOAuthCallback />} />
+                <Route path="/api/auth/spotify/callback" element={<SpotifyOAuthCallback />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
