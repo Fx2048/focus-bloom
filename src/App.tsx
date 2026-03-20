@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
+import SpotifyOAuthCallback from "./pages/SpotifyOAuthCallback";
 import Gamification from "./pages/Gamification";
 import Mentoring from "./pages/Mentoring";
 
