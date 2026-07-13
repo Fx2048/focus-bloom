@@ -182,6 +182,8 @@ export default function Dashboard() {
       }
     },
     [tasks, skippedBreaks, earnBadge]
+    completeTaskAndExplore(taskId);   // ← Añade esta línea
+    };
   );
 
   const getGreeting = (): string => {
