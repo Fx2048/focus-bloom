@@ -41,7 +41,7 @@ import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 import { LevelProgress } from '@/components/LevelProgress';
 import { RpgHeroPanel } from '@/components/RpgHeroPanel';
-import { AcademicLevelPanel } from '@/components/AcademicLevelPanel';
+import { AcademicProgressPanel } from '@/components/AcademicProgressPanel';
 import { AcademicPdfUploader } from '@/components/AcademicPdfUploader';
 
 export default function Dashboard() {
@@ -313,7 +313,7 @@ export default function Dashboard() {
 
             {!isGuest && <LevelProgress />}
 
-            {!isGuest && <AcademicLevelPanel />}
+            {!isGuest && <AcademicProgressPanel />}
 
             {!isGuest && <AcademicPdfUploader />}
 
