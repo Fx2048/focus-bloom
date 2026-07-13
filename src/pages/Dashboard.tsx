@@ -33,6 +33,7 @@ import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 import { LevelProgress } from '@/components/LevelProgress';
 import { RpgHeroPanel } from '@/components/RpgHeroPanel';
+import { AcademicLevelPanel } from '@/components/AcademicLevelPanel';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -251,6 +252,9 @@ export default function Dashboard() {
             {/* Level Progress */}
             {!isGuest && <LevelProgress />}
 
+            {/* Academic Level */}
+            {!isGuest && <AcademicLevelPanel />}
+
             {/* Analytics & Gamification Links */}
             {!isGuest && (
               <div className="grid grid-cols-2 gap-3">
@@ -275,6 +279,13 @@ export default function Dashboard() {
                   onClick={() => navigate('/mentoring')}
                 >
                   👥 Mentoring
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2 rounded-xl h-12"
+                  onClick={() => navigate('/schedule')}
+                >
+                  📚 Horario
                 </Button>
               </div>
             )}
