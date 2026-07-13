@@ -11,9 +11,11 @@ interface Props {
   onTaskClick?: (task: Task) => void;
 }
 
-const DAY_LABELS: Record<string, string> = {
-  monday: 'LUN', tuesday: 'MAR', wednesday: 'MIÉ',
-  thursday: 'JUE', friday: 'VIE', saturday: 'SÁB', sunday: 'DOM',
+const DAY_LABELS = ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'];
+const formatDay = (d: Date | string) => {
+  const date = d instanceof Date ? d : new Date(d);
+  if (isNaN(date.getTime())) return '—';
+  return DAY_LABELS[date.getDay()];
 };
 
 export function RpgHeroPanel({ tasks, onTaskClick }: Props) {
@@ -126,7 +128,7 @@ export function RpgHeroPanel({ tasks, onTaskClick }: Props) {
                     className="flex items-center gap-2 text-[12px] leading-tight cursor-pointer hover:bg-amber-200/50 rounded px-1.5 py-1 transition-colors"
                   >
                     <span className="text-amber-700 font-mono text-[10px] w-9 shrink-0">
-                      {DAY_LABELS[t.scheduledDay] ?? '—'}
+                      {formatDay(t.scheduledDay)}
                     </span>
                     <span className="w-1 h-1 rounded-full bg-amber-700/70 shrink-0" />
                     <span className="truncate flex-1">{t.name}</span>
