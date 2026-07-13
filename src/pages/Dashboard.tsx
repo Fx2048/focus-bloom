@@ -27,141 +27,201 @@ import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, X, Loader2, LayoutDashboard, ListTodo, Search, BarChart3 } from 'lucide-react';
+import {
+  Plus,
+  X,
+  Loader2,
+  LayoutDashboard,
+  ListTodo,
+  Search,
+  BarChart3,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 import { LevelProgress } from '@/components/LevelProgress';
 import { RpgHeroPanel } from '@/components/RpgHeroPanel';
 import { AcademicLevelPanel } from '@/components/AcademicLevelPanel';
+import { AcademicPdfUploader } from '@/components/AcademicPdfUploader';
 
 export default function Dashboard() {
   const { user } = useAuth();
   const isGuest = !user;
-  
-  // Use guest hooks for guest mode, real hooks for authenticated
+
   const authTasks = useTasks();
   const guestTasks = useGuestTasks();
   const taskHooks = isGuest ? guestTasks : authTasks;
-  const { tasks, isLoading: tasksLoading, updateTaskStatus, updateTaskPomodoros, addTask, updateTask, deleteTask } = taskHooks;
-  
+
+  const {
+    tasks,
+    isLoading: tasksLoading,
+    updateTaskStatus,
+    updateTaskPomodoros,
+    addTask,
+    updateTask,
+    deleteTask,
+  } = taskHooks;
+
   const { profile, addPoints } = useProfile();
-  const { motivationLevel, skippedBreaks, setMotivationLevel, incrementSkippedBreaks } = useDailyLog();
-  const { badges, earnBadge } = useBadges();
-  const { completedWorkSessions, createSession, completeSession } = usePomodoroSessions();
+  const {
+    motivationLevel,
+    skippedBreaks,
+    setMotivationLevel,
+    incrementSkippedBreaks,
+  } = useDailyLog();
+
+  const { earnBadge } = useBadges();
+  const { completedWorkSessions } = usePomodoroSessions();
   const { suggestedMood } = useMoodCalculator({ tasks, completedWorkSessions });
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { showOnboarding, markOnboardingDone } = useOnboarding();
-  const { enabled: notifEnabled, permission: notifPermission, toggleEnabled: toggleNotif, requestPermission: requestNotifPermission } = useNotifications(tasks);
-  
+
+  const {
+    enabled: notifEnabled,
+    permission: notifPermission,
+    toggleEnabled: toggleNotif,
+    requestPermission: requestNotifPermission,
+  } = useNotifications(tasks);
+
   const [showAddTask, setShowAddTask] = useState(false);
-  const [activePomodoro, setActivePomodoro] = useState<{ taskId: string; taskName: string } | null>(null);
+  const [activePomodoro, setActivePomodoro] = useState<{
+    taskId: string;
+    taskName: string;
+  } | null>(null);
+
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnboardingModal, setShowOnboardingModal] = useState(showOnboarding);
   const [activeTab, setActiveTab] = useState('summary');
   const [moodInitialized, setMoodInitialized] = useState(false);
 
-  // Suggest mood on first load
   useEffect(() => {
     if (!moodInitialized && tasks.length > 0) {
       setMoodInitialized(true);
-      // Don't override if user already set it today
     }
   }, [tasks, moodInitialized]);
 
-  // Filter tasks by search
   const filteredTasks = useMemo(() => {
     if (!searchQuery.trim()) return tasks;
-    const q = searchQuery.toLowerCase();
-    return tasks.filter(t => t.name.toLowerCase().includes(q));
+
+    const query = searchQuery.toLowerCase();
+
+    return tasks.filter((task) =>
+      task.name.toLowerCase().includes(query)
+    );
   }, [tasks, searchQuery]);
 
-  // Calculate burnout level
   const burnoutLevel = useMemo((): BurnoutLevel => {
     const hour = new Date().getHours();
-    const completedToday = tasks.filter(t => t.status === 'completed').length;
+    const completedToday = tasks.filter(
+      (task) => task.status === 'completed'
+    ).length;
 
     if (completedWorkSessions < 2 && hour < 14 && motivationLevel < 4) {
       return 'lazy';
     }
-    
+
     if (
-      completedWorkSessions > 8 || 
-      skippedBreaks > 2 || 
+      completedWorkSessions > 8 ||
+      skippedBreaks > 2 ||
       (hour > 20 && completedWorkSessions > 5) ||
       (completedToday > 4 && skippedBreaks > 1)
     ) {
       return 'burnout';
     }
-    
+
     return 'balanced';
   }, [completedWorkSessions, skippedBreaks, motivationLevel, tasks]);
 
-  const handleStartPomodoro = useCallback(async (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      setActivePomodoro({ taskId, taskName: task.name });
-    }
-  }, [tasks]);
+  const handleStartPomodoro = useCallback(
+    async (taskId: string) => {
+      const task = tasks.find((currentTask) => currentTask.id === taskId);
 
-  const handlePomodoroComplete = useCallback(async (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      updateTaskPomodoros(taskId, task.completedPomodoros + 1);
-      addPoints(POINTS_PER_POMODORO);
-      if (completedWorkSessions === 0) earnBadge('first-focus');
-      if (completedWorkSessions >= 9) earnBadge('consistency');
-      if (new Date().getHours() < 9) earnBadge('early-bird');
-    }
-  }, [tasks, updateTaskPomodoros, addPoints, completedWorkSessions, earnBadge]);
+      if (task) {
+        setActivePomodoro({ taskId, taskName: task.name });
+      }
+    },
+    [tasks]
+  );
+
+  const handlePomodoroComplete = useCallback(
+    async (taskId: string) => {
+      const task = tasks.find((currentTask) => currentTask.id === taskId);
+
+      if (task) {
+        updateTaskPomodoros(taskId, task.completedPomodoros + 1);
+        addPoints(POINTS_PER_POMODORO);
+
+        if (completedWorkSessions === 0) earnBadge('first-focus');
+        if (completedWorkSessions >= 9) earnBadge('consistency');
+        if (new Date().getHours() < 9) earnBadge('early-bird');
+      }
+    },
+    [
+      tasks,
+      updateTaskPomodoros,
+      addPoints,
+      completedWorkSessions,
+      earnBadge,
+    ]
+  );
 
   const handleSkipBreak = useCallback(() => {
     incrementSkippedBreaks();
   }, [incrementSkippedBreaks]);
 
-  const handleTaskComplete = useCallback((taskId: string) => {
-    const completedToday = tasks.filter(t => t.status === 'completed').length + 1;
-    if (completedToday >= 5) earnBadge('task-master');
-    if (completedToday >= 3 && skippedBreaks === 0) earnBadge('balanced-day');
-  }, [tasks, skippedBreaks, earnBadge]);
+  const handleTaskComplete = useCallback(
+    (taskId: string) => {
+      const completedToday =
+        tasks.filter((task) => task.status === 'completed').length + 1;
+
+      if (completedToday >= 5) earnBadge('task-master');
+      if (completedToday >= 3 && skippedBreaks === 0) {
+        earnBadge('balanced-day');
+      }
+    },
+    [tasks, skippedBreaks, earnBadge]
+  );
 
   const getGreeting = (): string => {
     const hour = new Date().getHours();
+
     if (hour < 12) return t('greeting.morning');
     if (hour < 17) return t('greeting.afternoon');
+
     return t('greeting.evening');
   };
 
   if (tasksLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const pendingCount = tasks.filter(t => t.status !== 'completed').length;
+  const pendingCount = tasks.filter((task) => task.status !== 'completed').length;
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Onboarding */}
       {showOnboardingModal && (
-        <OnboardingTutorial onComplete={() => {
-          markOnboardingDone();
-          setShowOnboardingModal(false);
-        }} />
+        <OnboardingTutorial
+          onComplete={() => {
+            markOnboardingDone();
+            setShowOnboardingModal(false);
+          }}
+        />
       )}
 
       <Header />
 
-      <main className="container px-4 py-6 pb-28 max-w-3xl mx-auto">
-        {/* Greeting */}
+      <main className="container mx-auto max-w-3xl px-4 py-6 pb-28">
         <div className="mb-5 animate-fade-in">
-          <h1 className="text-2xl font-bold text-foreground mb-1">
+          <h1 className="mb-1 text-2xl font-bold text-foreground">
             {getGreeting()} 👋
           </h1>
+
           <p className="text-muted-foreground">
             {pendingCount === 0
               ? t('greeting.noTasks')
@@ -169,35 +229,42 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Desktop search bar */}
-        <div className="hidden sm:block mb-5">
+        <div className="mb-5 hidden sm:block">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder={t('search.placeholder')}
-              className="w-full pl-9 h-10 bg-muted border-0 rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="h-10 w-full rounded-xl border-0 bg-muted pl-9 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
         </div>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-5">
-          <TabsList className="w-full grid grid-cols-2 h-12 rounded-xl bg-muted">
-            <TabsTrigger value="summary" className="rounded-lg gap-2 font-semibold data-[state=active]:shadow-soft">
-              <LayoutDashboard className="w-4 h-4" />
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-5"
+        >
+          <TabsList className="grid h-12 w-full grid-cols-2 rounded-xl bg-muted">
+            <TabsTrigger
+              value="summary"
+              className="gap-2 rounded-lg font-semibold data-[state=active]:shadow-soft"
+            >
+              <LayoutDashboard className="h-4 w-4" />
               {t('tab.summary')}
             </TabsTrigger>
-            <TabsTrigger value="tasks" className="rounded-lg gap-2 font-semibold data-[state=active]:shadow-soft">
-              <ListTodo className="w-4 h-4" />
+
+            <TabsTrigger
+              value="tasks"
+              className="gap-2 rounded-lg font-semibold data-[state=active]:shadow-soft"
+            >
+              <ListTodo className="h-4 w-4" />
               {t('tab.tasks')}
             </TabsTrigger>
           </TabsList>
 
-          {/* ===== TAB: SUMMARY ===== */}
-          <TabsContent value="summary" className="space-y-5 mt-0">
-            {/* RPG Hero Panel */}
+          <TabsContent value="summary" className="mt-0 space-y-5">
             {!isGuest && (
               <RpgHeroPanel
                 tasks={filteredTasks}
@@ -205,23 +272,22 @@ export default function Dashboard() {
               />
             )}
 
-            {/* Mood + Burnout grid */}
             <div className="grid gap-4 sm:grid-cols-2">
-              <MotivationSlider 
-                motivationLevel={motivationLevel} 
+              <MotivationSlider
+                motivationLevel={motivationLevel}
                 onMotivationChange={setMotivationLevel}
                 suggestedMood={suggestedMood}
               />
-              <BurnoutMeter 
-                burnoutLevel={burnoutLevel} 
+
+              <BurnoutMeter
+                burnoutLevel={burnoutLevel}
                 totalPomodoros={completedWorkSessions}
                 skippedBreaks={skippedBreaks}
               />
             </div>
 
-            {/* AI Daily Plan */}
             {!isGuest && tasks.length > 0 && (
-              <AIDailyPlan 
+              <AIDailyPlan
                 tasks={tasks}
                 motivationLevel={motivationLevel}
                 maxDailyHours={profile?.maxDailyHours ?? 6}
@@ -229,13 +295,10 @@ export default function Dashboard() {
               />
             )}
 
-            {/* Google Calendar Sync */}
             {!isGuest && <GoogleCalendarSync />}
 
-            {/* Spotify Player */}
             {!isGuest && <SpotifyPlayer />}
 
-            {/* Notifications */}
             <NotificationSettings
               enabled={notifEnabled}
               permission={notifPermission}
@@ -243,46 +306,47 @@ export default function Dashboard() {
               onRequestPermission={requestNotifPermission}
             />
 
-            {/* Calendar Panel */}
-            <CalendarPanel 
-              tasks={filteredTasks} 
-              onTaskClick={(task) => setEditingTask(task)} 
+            <CalendarPanel
+              tasks={filteredTasks}
+              onTaskClick={(task) => setEditingTask(task)}
             />
 
-            {/* Level Progress */}
             {!isGuest && <LevelProgress />}
 
-            {/* Academic Level */}
             {!isGuest && <AcademicLevelPanel />}
 
-            {/* Analytics & Gamification Links */}
+            {!isGuest && <AcademicPdfUploader />}
+
             {!isGuest && (
               <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  className="gap-2 rounded-xl h-12"
+                  className="h-12 gap-2 rounded-xl"
                   onClick={() => navigate('/analytics')}
                 >
-                  <BarChart3 className="w-4 h-4" />
+                  <BarChart3 className="h-4 w-4" />
                   {t('analytics.viewAll')}
                 </Button>
+
                 <Button
                   variant="outline"
-                  className="gap-2 rounded-xl h-12"
+                  className="h-12 gap-2 rounded-xl"
                   onClick={() => navigate('/gamification')}
                 >
                   🏆 Gamificación
                 </Button>
+
                 <Button
                   variant="outline"
-                  className="gap-2 rounded-xl h-12"
+                  className="h-12 gap-2 rounded-xl"
                   onClick={() => navigate('/mentoring')}
                 >
                   👥 Mentoring
                 </Button>
+
                 <Button
                   variant="outline"
-                  className="gap-2 rounded-xl h-12"
+                  className="h-12 gap-2 rounded-xl"
                   onClick={() => navigate('/schedule')}
                 >
                   📚 Horario
@@ -291,17 +355,15 @@ export default function Dashboard() {
             )}
           </TabsContent>
 
-          {/* ===== TAB: TASKS ===== */}
-          <TabsContent value="tasks" className="space-y-5 mt-0">
-            {/* Voice Command Button */}
+          <TabsContent value="tasks" className="mt-0 space-y-5">
             <VoiceCommandButton onTaskCreate={addTask} />
 
-            {/* Kanban Board */}
-            <KanbanBoard 
+            <KanbanBoard
               tasks={filteredTasks}
               onStartPomodoro={handleStartPomodoro}
               onUpdateStatus={(taskId, status) => {
                 updateTaskStatus(taskId, status);
+
                 if (status === 'completed') {
                   handleTaskComplete(taskId);
                 }
@@ -311,12 +373,11 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Add Task Modal */}
         {showAddTask && (
-          <div className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 animate-fade-in">
-            <div className="w-full max-w-md card-elevated p-6 animate-slide-up">
-              <AddTaskForm 
-                onClose={() => setShowAddTask(false)} 
+          <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/20 p-4 backdrop-blur-sm animate-fade-in sm:items-center">
+            <div className="card-elevated w-full max-w-md animate-slide-up p-6">
+              <AddTaskForm
+                onClose={() => setShowAddTask(false)}
                 onAddTask={(taskData) => {
                   addTask(taskData);
                   setShowAddTask(false);
@@ -326,10 +387,8 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* Task Edit Dialog */}
         <TaskEditDialog
           task={editingTask}
           isOpen={!!editingTask}
@@ -338,35 +397,35 @@ export default function Dashboard() {
           onDelete={(taskId) => deleteTask(taskId)}
         />
 
-        {/* Floating Add Button — centered bottom */}
-        <div className="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <div className="fixed bottom-16 left-1/2 z-40 -translate-x-1/2 sm:bottom-6">
           <Button
             size="xl"
-            variant={showAddTask ? "soft" : "calm"}
+            variant={showAddTask ? 'soft' : 'calm'}
             onClick={() => setShowAddTask(!showAddTask)}
             className={cn(
-              "rounded-full h-14 px-6 shadow-elevated gap-2",
-              showAddTask && "rotate-0"
+              'h-14 gap-2 rounded-full px-6 shadow-elevated',
+              showAddTask && 'rotate-0'
             )}
           >
             {showAddTask ? (
               <>
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
                 {t('voice.cancelBtn')}
               </>
             ) : (
               <>
-                <Plus className="w-5 h-5" />
+                <Plus className="h-5 w-5" />
                 {t('addTask.submit')}
               </>
             )}
           </Button>
         </div>
 
-        {/* Mobile Search Bar */}
-        <MobileSearchBar value={searchQuery} onChange={setSearchQuery} />
+        <MobileSearchBar
+          value={searchQuery}
+          onChange={setSearchQuery}
+        />
 
-        {/* Pomodoro Timer Modal */}
         {activePomodoro && (
           <PomodoroTimer
             taskId={activePomodoro.taskId}
