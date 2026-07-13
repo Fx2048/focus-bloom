@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { BurnoutLevel, POINTS_PER_POMODORO, Task } from '@/types/focusflow';
 import { LevelProgress } from '@/components/LevelProgress';
+import { RpgHeroPanel } from '@/components/RpgHeroPanel';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -195,6 +196,14 @@ export default function Dashboard() {
 
           {/* ===== TAB: SUMMARY ===== */}
           <TabsContent value="summary" className="space-y-5 mt-0">
+            {/* RPG Hero Panel */}
+            {!isGuest && (
+              <RpgHeroPanel
+                tasks={filteredTasks}
+                onTaskClick={(task) => setEditingTask(task)}
+              />
+            )}
+
             {/* Mood + Burnout grid */}
             <div className="grid gap-4 sm:grid-cols-2">
               <MotivationSlider 
