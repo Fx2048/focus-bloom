@@ -9,6 +9,7 @@ import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
 import { useMoodCalculator } from '@/hooks/useMoodCalculator';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useIslandExplorer } from '@/hooks/useIslandExplorer';
 import { Header } from '@/components/Header';
 import { BurnoutMeter } from '@/components/BurnoutMeter';
 import { MotivationSlider } from '@/components/MotivationSlider';
@@ -25,6 +26,7 @@ import { NotificationSettings } from '@/components/NotificationSettings';
 import { GoogleCalendarSync } from '@/components/GoogleCalendarSync';
 import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
+import { IslandExplorer } from '@/components/IslandExplorer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -76,6 +78,7 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { showOnboarding, markOnboardingDone } = useOnboarding();
+  const { completeTaskAndExplore } = useIslandExplorer();
 
   const {
     enabled: notifEnabled,
@@ -180,10 +183,10 @@ export default function Dashboard() {
       if (completedToday >= 3 && skippedBreaks === 0) {
         earnBadge('balanced-day');
       }
+
+      completeTaskAndExplore(taskId);
     },
-    [tasks, skippedBreaks, earnBadge]
-    completeTaskAndExplore(taskId);   // ← Añade esta línea
-    };
+    [tasks, skippedBreaks, earnBadge, completeTaskAndExplore]
   );
 
   const getGreeting = (): string => {
@@ -296,6 +299,8 @@ export default function Dashboard() {
                 onStartTask={handleStartPomodoro}
               />
             )}
+
+            <IslandExplorer />
 
             {!isGuest && <GoogleCalendarSync />}
 
