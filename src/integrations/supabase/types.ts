@@ -112,6 +112,51 @@ export type Database = {
         }
         Relationships: []
       }
+      courses: {
+        Row: {
+          code: string | null
+          color: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          name: string
+          professor: string | null
+          room: string | null
+          start_time: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code?: string | null
+          color?: string
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          name: string
+          professor?: string | null
+          room?: string | null
+          start_time: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string | null
+          color?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          name?: string
+          professor?: string | null
+          room?: string | null
+          start_time?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_logs: {
         Row: {
           created_at: string
@@ -356,6 +401,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          academic_level: number
+          academic_progress: number
+          academic_track: string | null
           avatar_emoji: string | null
           created_at: string
           display_name: string | null
@@ -370,6 +418,9 @@ export type Database = {
           xp: number
         }
         Insert: {
+          academic_level?: number
+          academic_progress?: number
+          academic_track?: string | null
           avatar_emoji?: string | null
           created_at?: string
           display_name?: string | null
@@ -384,6 +435,9 @@ export type Database = {
           xp?: number
         }
         Update: {
+          academic_level?: number
+          academic_progress?: number
+          academic_track?: string | null
           avatar_emoji?: string | null
           created_at?: string
           display_name?: string | null
