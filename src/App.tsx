@@ -15,6 +15,7 @@ import GoogleOAuthCallback from "./pages/GoogleOAuthCallback";
 import SpotifyOAuthCallback from "./pages/SpotifyOAuthCallback";
 import Gamification from "./pages/Gamification";
 import Mentoring from "./pages/Mentoring";
+import Schedule from "./pages/Schedule";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/gamification" element={<Gamification />} />
                 <Route path="/mentoring" element={<Mentoring />} />
+                <Route path="/schedule" element={<Schedule />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/api/auth/google/callback" element={<GoogleOAuthCallback />} />
                 <Route path="/api/auth/spotify/callback" element={<SpotifyOAuthCallback />} />
