@@ -9,7 +9,6 @@ import { usePomodoroSessions } from '@/hooks/usePomodoroSessions';
 import { useMoodCalculator } from '@/hooks/useMoodCalculator';
 import { useLanguage } from '@/hooks/useLanguage';
 import { useNotifications } from '@/hooks/useNotifications';
-import { useIslandExploration } from '@/hooks/useIslandExploration';
 import { Header } from '@/components/Header';
 import { BurnoutMeter } from '@/components/BurnoutMeter';
 import { MotivationSlider } from '@/components/MotivationSlider';
@@ -26,7 +25,6 @@ import { NotificationSettings } from '@/components/NotificationSettings';
 import { GoogleCalendarSync } from '@/components/GoogleCalendarSync';
 import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
-import { IslandExplorer } from '@/components/IslandExplorer';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -45,6 +43,7 @@ import { LevelProgress } from '@/components/LevelProgress';
 import { RpgHeroPanel } from '@/components/RpgHeroPanel';
 import { AcademicProgressPanel } from '@/components/AcademicProgressPanel';
 import { AcademicPdfUploader } from '@/components/AcademicPdfUploader';
+import { BloomIsland } from '@/components/BloomIsland';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -78,7 +77,6 @@ export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { showOnboarding, markOnboardingDone } = useOnboarding();
-  const { completeTaskAndExplore } = useIslandExploration();
 
   const {
     enabled: notifEnabled,
@@ -142,7 +140,10 @@ export default function Dashboard() {
       const task = tasks.find((currentTask) => currentTask.id === taskId);
 
       if (task) {
-        setActivePomodoro({ taskId, taskName: task.name });
+        setActivePomodoro({
+          taskId,
+          taskName: task.name,
+        });
       }
     },
     [tasks]
@@ -180,13 +181,12 @@ export default function Dashboard() {
         tasks.filter((task) => task.status === 'completed').length + 1;
 
       if (completedToday >= 5) earnBadge('task-master');
+
       if (completedToday >= 3 && skippedBreaks === 0) {
         earnBadge('balanced-day');
       }
-
-      completeTaskAndExplore(taskId);
     },
-    [tasks, skippedBreaks, earnBadge, completeTaskAndExplore]
+    [tasks, skippedBreaks, earnBadge]
   );
 
   const getGreeting = (): string => {
@@ -206,7 +206,13 @@ export default function Dashboard() {
     );
   }
 
-  const pendingCount = tasks.filter((task) => task.status !== 'completed').length;
+  const pendingCount = tasks.filter(
+    (task) => task.status !== 'completed'
+  ).length;
+
+  const completedTasks = tasks.filter(
+    (task) => task.status === 'completed'
+  ).length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -277,6 +283,16 @@ export default function Dashboard() {
               />
             )}
 
+            {!isGuest && (
+              <BloomIsland
+                totalPoints={profile?.totalPoints ?? 0}
+                completedTasks={completedTasks}
+                pomodoros={completedWorkSessions}
+                streakDays={profile?.streakDays ?? 0}
+                academicXp={0}
+              />
+            )}
+
             <div className="grid gap-4 sm:grid-cols-2">
               <MotivationSlider
                 motivationLevel={motivationLevel}
@@ -299,8 +315,6 @@ export default function Dashboard() {
                 onStartTask={handleStartPomodoro}
               />
             )}
-
-            <IslandExplorer />
 
             {!isGuest && <GoogleCalendarSync />}
 
