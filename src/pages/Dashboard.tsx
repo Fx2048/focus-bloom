@@ -288,7 +288,7 @@ export default function Dashboard() {
                 totalPoints={profile?.totalPoints ?? 0}
                 completedTasks={completedTasks}
                 pomodoros={completedWorkSessions}
-                streakDays={profile?.streakDays ?? 0}
+                streakDays={(profile as any)?.streakDays ?? 0}
                 academicXp={0}
               />
             )}
