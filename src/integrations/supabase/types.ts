@@ -14,6 +14,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      academic_courses: {
+        Row: {
+          code: string | null
+          credits: number
+          cycle: number | null
+          id: string
+          name: string
+          plan_id: string
+        }
+        Insert: {
+          code?: string | null
+          credits: number
+          cycle?: number | null
+          id?: string
+          name: string
+          plan_id: string
+        }
+        Update: {
+          code?: string | null
+          credits?: number
+          cycle?: number | null
+          id?: string
+          name?: string
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_courses_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "academic_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academic_plans: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          total_credits: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          total_credits: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          total_credits?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      academic_records: {
+        Row: {
+          course_id: string
+          grade: number | null
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          grade?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          grade?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academic_records_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "academic_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       badges_earned: {
         Row: {
           badge_id: string
