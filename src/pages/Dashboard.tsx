@@ -372,6 +372,14 @@ export default function Dashboard() {
                 >
                   📚 Horario
                 </Button>
+
+                <Button
+                  variant="outline"
+                  className="h-12 gap-2 rounded-xl"
+                  onClick={() => navigate('/curriculum')}
+                >
+                  🎓 Malla
+                </Button>
               </div>
             )}
           </TabsContent>
