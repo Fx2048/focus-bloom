@@ -251,6 +251,54 @@ export type Database = {
         }
         Relationships: []
       }
+      curriculum_courses: {
+        Row: {
+          code: string
+          color: string
+          created_at: string
+          credits: number
+          id: string
+          name: string
+          notes: string | null
+          position: number
+          prerequisites: string[]
+          semester: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          code?: string
+          color?: string
+          created_at?: string
+          credits?: number
+          id?: string
+          name: string
+          notes?: string | null
+          position?: number
+          prerequisites?: string[]
+          semester: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          color?: string
+          created_at?: string
+          credits?: number
+          id?: string
+          name?: string
+          notes?: string | null
+          position?: number
+          prerequisites?: string[]
+          semester?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_logs: {
         Row: {
           created_at: string
