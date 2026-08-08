@@ -27,6 +27,7 @@ import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import { OnboardingTutorial, useOnboarding } from '@/components/OnboardingTutorial';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { IslandWorld } from '@/components/IslandWorld';
 import {
   Plus,
   X,
