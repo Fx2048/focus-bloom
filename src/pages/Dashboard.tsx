@@ -43,7 +43,6 @@ import { LevelProgress } from '@/components/LevelProgress';
 import { RpgHeroPanel } from '@/components/RpgHeroPanel';
 import { AcademicProgressPanel } from '@/components/AcademicProgressPanel';
 import { AcademicPdfUploader } from '@/components/AcademicPdfUploader';
-import { BloomIsland } from '@/components/BloomIsland';
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -280,16 +279,6 @@ export default function Dashboard() {
               <RpgHeroPanel
                 tasks={filteredTasks}
                 onTaskClick={(task) => setEditingTask(task)}
-              />
-            )}
-
-            {!isGuest && (
-              <BloomIsland
-                totalPoints={profile?.totalPoints ?? 0}
-                completedTasks={completedTasks}
-                pomodoros={completedWorkSessions}
-                streakDays={(profile as any)?.streakDays ?? 0}
-                academicXp={0}
               />
             )}
 
