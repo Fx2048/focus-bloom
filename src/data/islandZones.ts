@@ -1,80 +1,145 @@
 import type { IslandZone } from '@/types/island';
 
-// El orden en este array ES el orden de exploración: cada zona se desbloquea
-// cuando el nivel del jugador alcanza `unlockLevel`. El nivel actual (1-11)
-// se calcula en useIslandExploration a partir del progreso de créditos real.
 export const ISLAND_ZONES: IslandZone[] = [
   {
-    id: 'orilla',
+    id: 'shore',
     name: 'La Orilla',
+    description:
+      'El primer territorio de la isla. Aquí comienza tu aventura.',
     unlockLevel: 1,
-    description: 'Donde empieza todo. Arena, mar y las primeras materias.',
-    icon: '🏖️',
-    gradient: ['#F9C9DE', '#5FD0C9'],
+    x: 5,
+    y: 55,
+    width: 30,
+    height: 35,
+    mystery: '¿Qué habrá más allá de la línea de árboles?',
   },
+
   {
-    id: 'costa-este',
+    id: 'east-coast',
     name: 'Costa Oriental',
+    description:
+      'Una costa escondida entre palmeras y pequeñas lagunas.',
     unlockLevel: 2,
-    description: 'Palmeras y los primeros cursos aprobados empiezan a notarse.',
-    icon: '🌴',
-    gradient: ['#FDCB8B', '#2FAFB0'],
+    x: 30,
+    y: 42,
+    width: 28,
+    height: 38,
+    mystery: 'Se dice que existe una antigua construcción cerca del agua.',
   },
+
   {
-    id: 'bosques-oeste',
-    name: 'Bosques del Oeste',
-    unlockLevel: 4,
-    description: 'La vegetación se espesa a medida que avanza el ciclo.',
-    icon: '🌲',
-    gradient: ['#BFE3C9', '#3E8E63'],
+    id: 'western-forest',
+    name: 'Bosque Occidental',
+    description:
+      'Un bosque antiguo donde aparecen criaturas y senderos desconocidos.',
+    unlockLevel: 3,
+    x: 5,
+    y: 18,
+    width: 30,
+    height: 38,
+    mystery: 'Alguien dejó huellas entre los árboles.',
   },
+
   {
-    id: 'aldea',
+    id: 'western-village',
     name: 'Aldea Occidental',
-    unlockLevel: 5,
-    description: 'Las primeras construcciones aparecen en el mapa.',
-    icon: '🏡',
-    gradient: ['#F6DDB0', '#C98A4B'],
+    description:
+      'Una pequeña región habitada que parece haber estado abandonada durante años.',
+    unlockLevel: 4,
+    x: 35,
+    y: 15,
+    width: 28,
+    height: 30,
+    mystery: '¿Quién construyó estas casas?',
   },
+
   {
-    id: 'interior',
+    id: 'island-interior',
     name: 'Interior de la Isla',
+    description:
+      'Una región mucho más profunda, llena de vegetación y caminos ocultos.',
+    unlockLevel: 5,
+    x: 58,
+    y: 20,
+    width: 30,
+    height: 35,
+    mystery: 'Hay símbolos extraños grabados en las piedras.',
+  },
+
+  {
+    id: 'mountains',
+    name: 'Montañas Perdidas',
+    description:
+      'Una cadena montañosa que domina el centro de la isla.',
     unlockLevel: 6,
-    description: 'Terreno desconocido, más allá de la costa.',
-    icon: '🗺️',
-    gradient: ['#CDEAF0', '#5B8FA8'],
+    x: 62,
+    y: 55,
+    width: 30,
+    height: 35,
+    mystery: 'Una luz aparece algunas noches en la montaña.',
   },
+
   {
-    id: 'montanas',
-    name: 'Montañas y Ruinas',
+    id: 'hidden-tribe',
+    name: 'Pueblo Oculto',
+    description:
+      'Una comunidad escondida en lo más profundo de la isla.',
     unlockLevel: 7,
-    description: 'Restos de algo más antiguo que la propia isla.',
-    icon: '🏔️',
-    gradient: ['#E4D8F2', '#7C6A9E'],
+    x: 38,
+    y: 52,
+    width: 25,
+    height: 35,
+    mystery:
+      'Los habitantes conocen la historia que dio origen a la isla.',
   },
+
   {
-    id: 'region-profunda',
-    name: 'Región Profunda',
+    id: 'ancient-ruins',
+    name: 'Ruinas Antiguas',
+    description:
+      'Restos de una civilización desconocida.',
+    unlockLevel: 8,
+    x: 65,
+    y: 10,
+    width: 28,
+    height: 30,
+    mystery:
+      'Las ruinas parecen representar un mapa de toda la isla.',
+  },
+
+  {
+    id: 'volcano',
+    name: 'Volcán Dormido',
+    description:
+      'Una zona peligrosa rodeada de lava y antiguas estructuras.',
     unlockLevel: 9,
-    description: 'Aquí se empiezan a encontrar señales de que no estás solo.',
-    icon: '🛖',
-    gradient: ['#D7E8C5', '#5B7A4C'],
+    x: 65,
+    y: 40,
+    width: 30,
+    height: 40,
+    mystery:
+      'En el interior existe una cámara que nadie ha logrado abrir.',
   },
+
   {
-    id: 'zona-prohibida',
-    name: 'Zona Prohibida',
-    unlockLevel: 11,
-    description: 'El último territorio conocido de la isla.',
-    icon: '🌋',
-    gradient: ['#3A2540', '#8C3B2A'],
+    id: 'sanctuary',
+    name: 'Santuario Celestial',
+    description:
+      'El lugar más misterioso descubierto hasta ahora.',
+    unlockLevel: 10,
+    x: 35,
+    y: 5,
+    width: 30,
+    height: 25,
+    mystery:
+      'Tal vez aquí se encuentre el secreto de la isla.',
   },
 ];
 
 export function zoneForLevel(level: number): IslandZone {
-  // la última zona cuyo unlockLevel <= level es la zona "activa"
-  let current = ISLAND_ZONES[0];
-  for (const zone of ISLAND_ZONES) {
-    if (zone.unlockLevel <= level) current = zone;
-  }
-  return current;
+  const available = ISLAND_ZONES.filter(
+    (zone) => zone.unlockLevel <= level
+  );
+
+  return available[available.length - 1] ?? ISLAND_ZONES[0];
 }
