@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import beachBg from '@/assets/rpg-beach-bg.jpg';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { calculateLevel } from '@/hooks/useLeaderboard';

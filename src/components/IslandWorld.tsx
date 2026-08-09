@@ -302,7 +302,7 @@ export function IslandWorld({ onObjectClick }: IslandWorldProps) {
       <div className="absolute left-5 right-5 top-5 z-50 flex items-start justify-between gap-3">
         <div className="rounded-2xl border border-white/20 bg-black/35 px-4 py-3 text-white shadow-xl backdrop-blur-md">
           <div className="flex items-center gap-2">
-            <Map className="h-4 w-4 text-emerald-300" />
+            <MapIcon className="h-4 w-4 text-emerald-300" />
 
             <span className="text-xs font-semibold uppercase tracking-widest">
               Mundo de la isla
