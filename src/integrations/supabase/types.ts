@@ -356,6 +356,78 @@ export type Database = {
         }
         Relationships: []
       }
+      island_objects: {
+        Row: {
+          animation: string
+          created_at: string
+          id: string
+          source: string
+          source_id: string | null
+          type: string
+          user_id: string
+          x: number
+          y: number
+          zone_id: string
+        }
+        Insert: {
+          animation?: string
+          created_at?: string
+          id?: string
+          source?: string
+          source_id?: string | null
+          type: string
+          user_id: string
+          x?: number
+          y?: number
+          zone_id: string
+        }
+        Update: {
+          animation?: string
+          created_at?: string
+          id?: string
+          source?: string
+          source_id?: string | null
+          type?: string
+          user_id?: string
+          x?: number
+          y?: number
+          zone_id?: string
+        }
+        Relationships: []
+      }
+      leaderboard: {
+        Row: {
+          avatar_emoji: string | null
+          display_name: string | null
+          level: number
+          streak_days: number
+          total_points: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          avatar_emoji?: string | null
+          display_name?: string | null
+          level?: number
+          streak_days?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          avatar_emoji?: string | null
+          display_name?: string | null
+          level?: number
+          streak_days?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
       mentoring_messages: {
         Row: {
           content: string

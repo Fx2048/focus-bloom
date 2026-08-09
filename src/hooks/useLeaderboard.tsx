@@ -35,7 +35,7 @@ export function useLeaderboard() {
     queryKey: ['leaderboard'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('leaderboard')
         .select('user_id, display_name, avatar_emoji, xp, level, total_points, streak_days')
         .order('xp', { ascending: false })
         .limit(50);
