@@ -356,6 +356,45 @@ export type Database = {
         }
         Relationships: []
       }
+      island_objects: {
+        Row: {
+          animation: string
+          created_at: string
+          id: string
+          source: string
+          source_id: string | null
+          type: string
+          user_id: string
+          x: number
+          y: number
+          zone_id: string
+        }
+        Insert: {
+          animation?: string
+          created_at?: string
+          id?: string
+          source?: string
+          source_id?: string | null
+          type: string
+          user_id: string
+          x?: number
+          y?: number
+          zone_id: string
+        }
+        Update: {
+          animation?: string
+          created_at?: string
+          id?: string
+          source?: string
+          source_id?: string | null
+          type?: string
+          user_id?: string
+          x?: number
+          y?: number
+          zone_id?: string
+        }
+        Relationships: []
+      }
       mentoring_messages: {
         Row: {
           content: string
