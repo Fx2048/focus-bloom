@@ -175,18 +175,32 @@ export default function Dashboard() {
     incrementSkippedBreaks();
   }, [incrementSkippedBreaks]);
 
+  const TASK_COMPLETION_XP = 20;
+
   const handleTaskComplete = useCallback(
     (taskId: string) => {
+      const task = tasks.find((currentTask) => currentTask.id === taskId);
+  
+      // Evita dar XP dos veces si una tarea ya estaba completada.
+      if (!task || task.status === 'completed') {
+        return;
+      }
+  
+      // XP por completar una misión.
+      addPoints(TASK_COMPLETION_XP);
+  
       const completedToday =
-        tasks.filter((task) => task.status === 'completed').length + 1;
-
-      if (completedToday >= 5) earnBadge('task-master');
-
+        tasks.filter((currentTask) => currentTask.status === 'completed').length + 1;
+  
+      if (completedToday >= 5) {
+        earnBadge('task-master');
+      }
+  
       if (completedToday >= 3 && skippedBreaks === 0) {
         earnBadge('balanced-day');
       }
     },
-    [tasks, skippedBreaks, earnBadge]
+    [tasks, skippedBreaks, earnBadge, addPoints]
   );
 
   const getGreeting = (): string => {
