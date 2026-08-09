@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import {
   Lock,
-  Map,
+  Map as MapIcon,
   Sparkles,
   Trees,
   Waves,
