@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { calculateLevel } from '@/hooks/useLeaderboard';
 import { Task } from '@/types/focusflow';
-import beachBg from '@/assets/rpg-beach-bg.jpg';
+import { IslandWorld } from '@/components/IslandWorld';
 import { Sparkles } from 'lucide-react';
 import {
   MissionDetailModal,
