@@ -24,7 +24,6 @@ import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { MobileSearchBar } from '@/components/MobileSearchBar';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { GoogleCalendarSync } from '@/components/GoogleCalendarSync';
-import { SpotifyPlayer } from '@/components/SpotifyPlayer';
 import {
   OnboardingTutorial,
   useOnboarding,
