@@ -583,7 +583,7 @@ export default function Dashboard() {
             {!isGuest && <GoogleCalendarSync />}
 
 
-            {!isGuest && <SpotifyPlayer />}
+         
 
 
             <NotificationSettings
