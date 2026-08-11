@@ -27,15 +27,24 @@ Deno.serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } =
-      await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+
+    let userId: string | undefined;
+    const { data: claimsData } = await supabase.auth.getClaims(token);
+    userId = claimsData?.claims?.sub as string | undefined;
+
+    if (!userId) {
+      // Fallback: verify against the auth server directly
+      const { data: userData } = await supabase.auth.getUser(token);
+      userId = userData?.user?.id;
+    }
+
+    if (!userId) {
+      console.error("spotify-refresh: could not resolve user from token");
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub;
 
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
