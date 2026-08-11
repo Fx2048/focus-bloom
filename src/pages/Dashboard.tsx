@@ -24,6 +24,7 @@ import { TaskEditDialog } from '@/components/TaskEditDialog';
 import { MobileSearchBar } from '@/components/MobileSearchBar';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { GoogleCalendarSync } from '@/components/GoogleCalendarSync';
+import { IslandMusicPlayer } from '@/components/IslandMusicPlayer';
 import {
   OnboardingTutorial,
   useOnboarding,
@@ -582,7 +583,7 @@ export default function Dashboard() {
 
             {!isGuest && <GoogleCalendarSync />}
 
-
+            {!isGuest && <IslandMusicPlayer />}
          
 
 
