@@ -184,12 +184,17 @@ export function IslandMusicPlayer() {
       playerOptions.playerVars.list = selectedSound.playlistId;
     }
 
+    if (selectedSound.videoId) {
+      playerOptions.videoId = selectedSound.videoId;
+    }
+
+    if (!selectedSound.videoId && !selectedSound.playlistId) {
+      return;
+    }
+
     playerRef.current = new window.YT.Player(
       containerRef.current,
-      {
-        ...playerOptions,
-        videoId: selectedSound.videoId,
-      }
+      playerOptions
     );
 
     setIsPlaying(false);
