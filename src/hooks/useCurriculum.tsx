@@ -18,6 +18,14 @@ export interface CurriculumCourse {
 
 export type CurriculumInput = Omit<CurriculumCourse, 'id'>;
 
+export interface ParsedCourse {
+  code: string;
+  name: string;
+  credits: number;
+  cycle: number;
+  prerequisites: string[];
+}
+
 function mapRow(r: any): CurriculumCourse {
   return {
     id: r.id,
@@ -106,11 +114,82 @@ export function useCurriculum() {
     },
   });
 
+  const importCourses = useMutation({
+    mutationFn: async ({
+      parsed,
+      semesters,
+      replace,
+    }: {
+      parsed: ParsedCourse[];
+      semesters: string[];
+      replace: boolean;
+    }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      if (replace) {
+        const { error } = await supabase
+          .from('curriculum_courses' as any)
+          .delete()
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+
+      const palette = ['#c8f55a', '#8b5cf6', '#f59e0b', '#22d3ee', '#ec4899', '#10b981', '#ef4444', '#3b82f6'];
+
+      const rows = parsed.map((c, i) => ({
+        user_id: user.id,
+        code: c.code ?? '',
+        name: c.name,
+        credits: c.credits ?? 3,
+        semester: semesters[Math.min(Math.max(c.cycle, 1), semesters.length) - 1],
+        prerequisites: [] as string[],
+        color: palette[(Math.max(c.cycle, 1) - 1) % palette.length],
+        notes: null,
+        position: i,
+        status: 'planned',
+      }));
+      const { data: inserted, error: insertError } = await supabase
+        .from('curriculum_courses' as any)
+        .insert(rows)
+        .select('id, code, name');
+      if (insertError) throw insertError;
+
+      // Resolver prerrequisitos por código o nombre
+      const norm = (s: string) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+      const byKey = new Map<string, string>();
+      for (const row of (inserted as any[]) ?? []) {
+        if (row.code) byKey.set(norm(row.code), row.id);
+        byKey.set(norm(row.name), row.id);
+      }
+
+      for (let i = 0; i < parsed.length; i++) {
+        const refs = parsed[i].prerequisites ?? [];
+        if (!refs.length) continue;
+        const ids = refs.map((r) => byKey.get(norm(r))).filter(Boolean) as string[];
+        const self = (inserted as any[])?.[i];
+        if (!ids.length || !self) continue;
+        await supabase
+          .from('curriculum_courses' as any)
+          .update({ prerequisites: ids.filter((id) => id !== self.id) })
+          .eq('id', self.id);
+      }
+
+      return rows.length;
+    },
+    onSuccess: (count) => {
+      qc.invalidateQueries({ queryKey: ['curriculum'] });
+      toast.success(`${count} cursos importados desde tu malla`);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   return {
     courses,
     isLoading,
     addCourse: addCourse.mutate,
     updateCourse: updateCourse.mutate,
     deleteCourse: deleteCourse.mutate,
+    importCourses: importCourses.mutateAsync,
+    isImporting: importCourses.isPending,
   };
 }
