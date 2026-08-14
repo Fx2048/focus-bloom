@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { CurriculumImporter } from '@/components/CurriculumImporter';
 import { ArrowLeft, Plus, Trash2, GraduationCap, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -37,7 +38,7 @@ type Draft = Partial<CurriculumCourse> & { id?: string; semester: string; name: 
 export default function Curriculum() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { courses, isLoading, addCourse, updateCourse, deleteCourse } = useCurriculum();
+  const { courses, isLoading, addCourse, updateCourse, deleteCourse, importCourses, isImporting } = useCurriculum();
   const [editing, setEditing] = useState<Draft | null>(null);
   const cardRefs = useRef(new Map<string, HTMLElement>());
   const boardRef = useRef<HTMLDivElement>(null);
@@ -154,6 +155,7 @@ export default function Curriculum() {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            <CurriculumImporter semesters={SEMESTERS} onImport={importCourses} isImporting={isImporting} />
             <Badge variant="secondary" className="text-sm">Total: {totalCredits} créditos</Badge>
             <Badge className="text-sm bg-primary text-primary-foreground">Aprobados: {completedCredits}</Badge>
           </div>
