@@ -1,0 +1,2 @@
+import { Sparkles, X } from 'lucide-react';
+export function WorldEvolutionCelebration({xp,onClose}:{xp:number;onClose:()=>void}){return <div className="modal-backdrop"><div className="celebration"><button className="close" onClick={onClose}><X/></button><div className="bloom-orb"><Sparkles size={42}/></div><p className="eyebrow">El reino responde</p><h2>¡Tu mundo floreció!</h2><p>Has consolidado un nuevo tramo de energía académica.</p><strong>+{xp} XP · +1 Semilla Bloom</strong><button className="finish" onClick={onClose}>Continuar explorando</button></div></div>}

@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
@@ -17,6 +17,7 @@ import Gamification from "./pages/Gamification";
 import Mentoring from "./pages/Mentoring";
 import Schedule from "./pages/Schedule";
 import Curriculum from "./pages/Curriculum";
+import { AcademicWorldProvider } from "./hooks/useAcademicWorld";
 
 const queryClient = new QueryClient();
 
@@ -25,13 +26,13 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
       <LanguageProvider>
         <AuthProvider>
-          <TooltipProvider>
+          <AcademicWorldProvider><TooltipProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/dashboard" element={<Index />} />
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/gamification" element={<Gamification />} />
@@ -45,7 +46,7 @@ const App = () => (
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
-          </TooltipProvider>
+          </TooltipProvider></AcademicWorldProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>
