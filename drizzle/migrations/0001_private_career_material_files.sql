@@ -1,0 +1,3 @@
+CREATE POLICY study_files_insert ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'study-materials' AND (storage.foldername(name))[1] = auth.uid()::text);
+CREATE POLICY study_files_read ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'study-materials' AND ((storage.foldername(name))[1] = auth.uid()::text OR EXISTS (SELECT 1 FROM public.study_materials s JOIN public.study_career_members m ON m.career = s.career WHERE s.file_path = name AND m.user_id = auth.uid())));
+CREATE POLICY study_files_delete ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'study-materials' AND (storage.foldername(name))[1] = auth.uid()::text);
