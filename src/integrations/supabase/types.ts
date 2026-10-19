@@ -697,6 +697,215 @@ export type Database = {
         }
         Relationships: []
       }
+      study_ai_access: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          status: number
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          reason: string
+          status: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          status?: number
+        }
+        Relationships: []
+      }
+      study_career_members: {
+        Row: {
+          career: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          career: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          career?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_checks: {
+        Row: {
+          answers: Json | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          minutes: number
+          notes: string
+          questions: Json
+          score: number | null
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          minutes?: number
+          notes: string
+          questions: Json
+          score?: number | null
+          topic: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          minutes?: number
+          notes?: string
+          questions?: Json
+          score?: number | null
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_deadlines: {
+        Row: {
+          completed: boolean
+          course: string
+          created_at: string
+          due_at: string
+          id: string
+          notes: string
+          priority: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          course?: string
+          created_at?: string
+          due_at: string
+          id?: string
+          notes?: string
+          priority?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          course?: string
+          created_at?: string
+          due_at?: string
+          id?: string
+          notes?: string
+          priority?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_materials: {
+        Row: {
+          career: string
+          course: string
+          created_at: string
+          description: string
+          file_path: string | null
+          id: string
+          title: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          career: string
+          course?: string
+          created_at?: string
+          description?: string
+          file_path?: string | null
+          id?: string
+          title: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          career?: string
+          course?: string
+          created_at?: string
+          description?: string
+          file_path?: string | null
+          id?: string
+          title?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      study_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: Json
+          sdk_id: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: Json
+          sdk_id: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: Json
+          sdk_id?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_messages_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "study_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_threads: {
+        Row: {
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           completed_at: string | null
