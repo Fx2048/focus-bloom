@@ -1,0 +1,9 @@
+import { Check, Circle, Pencil, Trash2, CalendarDays } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import type { Deadline } from '@/hooks/useStudyWorkspace';
+import { useLanguage } from '@/hooks/useLanguage';
+import { useStudyText } from './StudyShell';
+export function DeadlineList({items,toggle,edit,remove}:{items:Deadline[];toggle:(d:Deadline)=>void;edit?:(d:Deadline)=>void;remove?:(id:string)=>void}){
+ const text=useStudyText();const {language}=useLanguage();
+ return <div className="deadline-list">{!items.length?<div className="study-empty"><CalendarDays size={28}/><p>{text('Todo despejado por aquí.','All clear here.')}</p><small>{text('Tus próximas entregas aparecerán aquí.','Your upcoming deadlines will appear here.')}</small></div>:items.map(d=><article key={d.id} className={`deadline-row ${d.completed?'completed':''}`}><Button size="icon-sm" variant="ghost" aria-label={text(d.completed?'Reabrir actividad':'Completar actividad',d.completed?'Reopen activity':'Complete activity')} onClick={()=>toggle(d)}>{d.completed?<Check className="text-primary"/>:<Circle className="text-muted-foreground"/>}</Button><div className="min-w-0 flex-1"><h3>{d.title}</h3><p>{d.course||text('Actividad académica','Academic activity')}</p></div><div className="deadline-meta"><span className={`study-priority priority-${d.priority}`}>{text(d.priority==='high'?'Prioritaria':d.priority==='low'?'Flexible':'Normal',d.priority==='high'?'Priority':d.priority==='low'?'Flexible':'Normal')}</span><time>{new Date(d.due_at).toLocaleDateString(language,{day:'numeric',month:'short'})}</time></div>{edit&&<Button variant="ghost" size="icon-sm" aria-label={text('Editar entrega','Edit deadline')} onClick={()=>edit(d)}><Pencil size={14}/></Button>}{remove&&<Button variant="ghost" size="icon-sm" aria-label={text('Eliminar entrega','Delete deadline')} onClick={()=>remove(d.id)}><Trash2 size={14}/></Button>}</article>)}</div>;
+}
