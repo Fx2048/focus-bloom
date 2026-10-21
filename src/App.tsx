@@ -18,6 +18,12 @@ import Mentoring from "./pages/Mentoring";
 import Schedule from "./pages/Schedule";
 import Curriculum from "./pages/Curriculum";
 import { AcademicWorldProvider } from "./hooks/useAcademicWorld";
+import AcademicHome from './pages/AcademicHome';
+import StudyAgenda from './pages/StudyAgenda';
+import StudyChat from './pages/StudyChat';
+import StudyMaterials from './pages/StudyMaterials';
+import StudyLearning from './pages/StudyLearning';
+import Login from './pages/Login';
 
 const queryClient = new QueryClient();
 
@@ -31,7 +37,13 @@ const App = () => (
             <Sonner />
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/" element={<AcademicHome />} />
+                <Route path="/agenda" element={<StudyAgenda />} />
+                <Route path="/chat" element={<StudyChat />} />
+                <Route path="/chat/:threadId" element={<StudyChat />} />
+                <Route path="/materials" element={<StudyMaterials />} />
+                <Route path="/study" element={<StudyLearning />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/analytics" element={<Analytics />} />

@@ -23,9 +23,11 @@ export default function Login() {
     setIsLoading(true);
     
     if (isSignUp) {
-      await signUp(email.trim(), password);
+      const result = await signUp(email.trim(), password);
+      if (!result.error) setIsSignUp(false);
     } else {
-      await signIn(email.trim(), password);
+      const result = await signIn(email.trim(), password);
+      if (!result.error) navigate('/');
     }
     
     setIsLoading(false);
