@@ -15,6 +15,13 @@
       "when": 1792374870347,
       "tag": "0001_private_career_material_files",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792628045190,
+      "tag": "0002_protect_assessment_answers",
+      "breakpoints": true
     }
   ]
 }

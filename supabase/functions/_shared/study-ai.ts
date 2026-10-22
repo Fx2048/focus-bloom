@@ -1,7 +1,8 @@
 import { createOpenAI } from 'npm:@ai-sdk/openai@4.0.96';
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { createLovableAiGatewayRunIdFetch, getLovableAiGatewayRunId } from './run-id.ts';
-export const cors = { 'Access-Control-Allow-Origin':'*', 'Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type', 'Access-Control-Allow-Methods':'POST, OPTIONS' };
+export const cors = { ...corsHeaders, 'Access-Control-Allow-Methods':'POST, OPTIONS' };
 export function json(data: unknown, status = 200) { return new Response(JSON.stringify(data), {status, headers:{...cors,'Content-Type':'application/json'}}); }
 export async function authenticate(req: Request) {
   const url = Deno.env.get('SUPABASE_URL'); const key = Deno.env.get('SUPABASE_ANON_KEY'); const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
