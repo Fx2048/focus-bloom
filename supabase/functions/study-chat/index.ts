@@ -7,6 +7,7 @@ Deno.serve(async req=>{
   try {
     const auth=await authenticate(req); if(!auth) return json({error:'Inicia sesión para usar el asistente.'},401);
     const body=await req.json();
+    if(!body || typeof body.threadId!=='string' || !z.uuid().safeParse(body.threadId).success || !Array.isArray(body.messages) || body.messages.length===0 || JSON.stringify(body.messages).length>250000) return json({error:'Conversación o mensajes inválidos.'},400);
     const {data:thread,error}=await auth.client.from('study_threads').select('*').eq('id',body.threadId).eq('user_id',auth.user.id).single();
     if(error || !thread) return json({error:'Conversación no encontrada.'},404);
     const tools={activities:tool({description:'Read the student’s deadlines and unfinished academic tasks to filter and prioritize their work.',inputSchema:z.object({}),execute:async()=>{
@@ -14,7 +15,8 @@ Deno.serve(async req=>{
       if(deadlines.error || tasks.error) throw new Error('No se pudieron leer las actividades.');
       return {deadlines:deadlines.data,tasks:tasks.data,today:new Date().toISOString()};
     }})};
-    const messages=await validateUIMessages({messages:body.messages,tools});
+    let messages;
+    try {messages=await validateUIMessages({messages:body.messages,tools});}catch{return json({error:'El historial contiene mensajes inválidos.'},400);}
     const userMessage=messages.at(-1);
     if(!userMessage || userMessage.role!=='user') return json({error:'Escribe un mensaje.'},400);
     const {error:saveError}=await auth.client.from('study_messages').upsert({thread_id:thread.id,user_id:auth.user.id,sdk_id:userMessage.id,message:userMessage},{onConflict:'thread_id,sdk_id'});

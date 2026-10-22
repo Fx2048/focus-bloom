@@ -1,11 +1,12 @@
 import { NavLink, Link, useLocation } from 'react-router-dom';
+import { useCallback } from 'react';
 import { LayoutDashboard, CalendarDays, MessageCircle, FolderOpen, GraduationCap, Map, ArrowUpRight, Globe, LogIn, Sprout } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useLanguage } from '@/hooks/useLanguage';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import emblem from '@/assets/study-emblem.png';
-export function useStudyText(){const {language}=useLanguage();return (es:string,en:string)=>language==='es'?es:en;}
+export function useStudyText(){const {language}=useLanguage();return useCallback((es:string,en:string)=>language==='es'?es:en,[language]);}
 export function StudyShell({children}:{children:React.ReactNode}) {
   const text=useStudyText(); const {user,signOut}=useAuth();const {language,setLanguage}=useLanguage(); const location=useLocation();
   const links=[['/',LayoutDashboard,text('Mi espacio','My space')],['/agenda',CalendarDays,text('Agenda','Agenda')],['/chat',MessageCircle,text('Asistente Bloom','Bloom assistant')],['/materials',FolderOpen,text('Biblioteca compartida','Shared library')],['/study',GraduationCap,text('Estudio & progreso','Study & progress')]] as const;
