@@ -7,6 +7,11 @@ Deno.serve(async req=>{
   try {
     const auth=await authenticate(req); if(!auth) return json({error:'Inicia sesión para guardar tus evaluaciones.'},401);
     const body=await req.json();
+    if(body.action==='read') {
+      const {data:check,error}=await auth.admin.from('study_checks').select('*').eq('id',body.id).eq('user_id',auth.user.id).single();
+      if(error || !check) return json({error:'Evaluación no encontrada.'},404);
+      return json({check:{...check,questions:check.completed_at?check.questions:check.questions.map(({answer,explanation,...q})=>q)}});
+    }
     if(body.action==='grade') {
       const {data:check,error}=await auth.admin.from('study_checks').select('*').eq('id',body.id).eq('user_id',auth.user.id).single();
       if(error || !check) return json({error:'Evaluación no encontrada.'},404);
@@ -25,7 +30,8 @@ Deno.serve(async req=>{
     try {output=await result.output;} catch(e){if(NoObjectGeneratedError.isInstance(e)){try{output=schema.parse(JSON.parse(e.text));}catch{return json({error:'No se pudo generar una evaluación válida.'},422);}}else throw e;}
     const questions=output.questions.slice(0,3);
     if(questions.length!==3 || questions.some(q=>q.options.length!==4||!Number.isInteger(q.answer)||q.answer<0||q.answer>3)) return json({error:'La evaluación generada no es válida.'},422);
-    const {data:check,error}=await auth.admin.from('study_checks').insert({user_id:auth.user.id,topic:body.topic.slice(0,200),notes:body.notes,minutes:25,questions}).select('*').single();
+    const minutes=typeof body.minutes==='number'&&Number.isInteger(body.minutes)&&body.minutes>=0&&body.minutes<=25?body.minutes:0;
+    const {data:check,error}=await auth.admin.from('study_checks').insert({user_id:auth.user.id,topic:body.topic.slice(0,200),notes:body.notes,minutes,questions}).select('*').single();
     if(error) throw error;
     return json({check:{...check,questions:questions.map(({answer,explanation,...q})=>q)}});
   }catch(e){if(req.signal.aborted) return json({error:'Cancelled'},499); console.error('Study assessment failure',e); const status=(e as {statusCode?:number}).statusCode || 500; return json({error:(e as Error).message || 'No se pudo generar la evaluación.'},status);}

@@ -13,7 +13,7 @@ Deno.serve(async req=>{
       const [deadlines,tasks]=await Promise.all([auth.client.from('study_deadlines').select('title,course,due_at,priority,completed,notes').eq('user_id',auth.user.id).order('due_at'),auth.client.from('tasks').select('name,difficulty,estimated_hours,scheduled_day,status').eq('user_id',auth.user.id).neq('status','completed')]);
       if(deadlines.error || tasks.error) throw new Error('No se pudieron leer las actividades.');
       return {deadlines:deadlines.data,tasks:tasks.data,today:new Date().toISOString()};
-    })};
+    }})};
     const messages=await validateUIMessages({messages:body.messages,tools});
     const userMessage=messages.at(-1);
     if(!userMessage || userMessage.role!=='user') return json({error:'Escribe un mensaje.'},400);
