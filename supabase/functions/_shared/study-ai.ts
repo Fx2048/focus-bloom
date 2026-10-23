@@ -14,13 +14,10 @@ export async function authenticate(req: Request) {
   if(error || !data.user) return null;
   return {client, admin:createClient(url,serviceKey), user:data.user};
 }
-export async function gateway(req: Request, admin: ReturnType<typeof createClient>, resume = false) {
+export async function gateway(req: Request, admin: ReturnType<typeof createClient>) {
   const {data:blocked,error} = await admin.from('study_ai_access').select('*').eq('id','workspace').maybeSingle();
   if(error) throw error;
-  if(blocked) {
-    if(resume && blocked.status === 402) { const {error:clearError}=await admin.from('study_ai_access').delete().eq('id','workspace'); if(clearError) throw clearError; }
-    else return {blocked};
-  }
+  if(blocked) return {blocked};
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
   if(!apiKey) return {blocked:{reason:'Lovable AI is not configured.', status:401}};
   const run = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(req));
