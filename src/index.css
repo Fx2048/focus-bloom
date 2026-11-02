@@ -283,3 +283,67 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
 }
+
+
+/* ============================================================
+   ISLAND ANIMATIONS — Focus Bloom Gamification
+   ============================================================ */
+
+@keyframes bloom-in {
+  0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.2) rotate(3deg);  opacity: 1; }
+  100% { transform: scale(1)   rotate(0deg);  opacity: 1; }
+}
+
+@keyframes sway {
+  0%,100% { transform: rotate(-3deg) translateX(0); }
+  50%     { transform: rotate(3deg)  translateX(1px); }
+}
+
+@keyframes float-up {
+  0%   { transform: translateX(-50%) translateY(0)     scale(1);   opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-130px) scale(0.7); opacity: 0; }
+}
+
+@keyframes cloud-drift {
+  0%   { transform: translateX(0px); }
+  100% { transform: translateX(40px); }
+}
+
+@keyframes butterfly-fly {
+  0%,100% { transform: translate(0px, 0px)   rotate(0deg); }
+  25%     { transform: translate(18px, -12px) rotate(8deg); }
+  50%     { transform: translate(0px, -22px)  rotate(0deg); }
+  75%     { transform: translate(-18px,-12px) rotate(-8deg); }
+}
+
+@keyframes sparkle-float {
+  0%   { transform: translateY(0)    scale(1);   opacity: 0.85; }
+  100% { transform: translateY(-55px) scale(0);   opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%,100% { filter: drop-shadow(0 0 6px rgba(255,220,90,0.55)); }
+  50%     { filter: drop-shadow(0 0 18px rgba(255,220,90,0.9)); }
+}
+
+@keyframes wave-motion {
+  0%,100% { transform: translateX(0); }
+  50%     { transform: translateX(10px); }
+}
+
+@keyframes xp-pop {
+  0%   { transform: translateX(-50%) scale(0.5); opacity: 0; }
+  55%  { transform: translateX(-50%) scale(1.15); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1);    opacity: 1; }
+}
+
+/* Utility classes */
+.animate-bloom-in   { animation: bloom-in      0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-sway       { animation: sway           3.2s ease-in-out infinite; }
+.animate-float-up   { animation: float-up       2s   ease-out forwards; }
+.animate-cloud-drift{ animation: cloud-drift    8s   ease-in-out infinite alternate; }
+.animate-butterfly  { animation: butterfly-fly  4s   ease-in-out infinite; }
+.animate-sparkle    { animation: sparkle-float  3s   ease-out infinite; }
+.animate-glow       { animation: glow-pulse     2s   ease-in-out infinite; }
+.animate-xp-pop     { animation: xp-pop         0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
