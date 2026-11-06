@@ -4,18 +4,21 @@ import { useFrame } from '@react-three/fiber';
 import type { Group, MeshBasicMaterial } from 'three';
 
 import type { UnlockedElement } from '../useIslandProgression';
+import type { ThemeConfig } from '../IslandCanvas';
 import IslandElement3D from './IslandElements3D';
 
 interface IslandModels3DProps {
   elements: UnlockedElement[];
   newlyUnlockedIds?: string[];
   onElementClick?: (element: UnlockedElement) => void;
+  theme: ThemeConfig;
 }
 
 interface PlacedElementProps {
   element: UnlockedElement;
   isNew: boolean;
   onElementClick?: (element: UnlockedElement) => void;
+  accent: string;
 }
 
 function convertCoordinates(
@@ -33,6 +36,7 @@ function PlacedElement({
   element,
   isNew,
   onElementClick,
+  accent,
 }: PlacedElementProps) {
   const groupRef = useRef<Group>(null);
   const haloRef = useRef<Group>(null);
@@ -84,6 +88,7 @@ function PlacedElement({
         type={element.type}
         position={[0, 0, 0]}
         scale={1}
+        accent={accent}
       />
 
       {isNew && (
@@ -97,7 +102,7 @@ function PlacedElement({
             <ringGeometry args={[0.42, 0.52, 40]} />
             <meshBasicMaterial
               ref={haloMaterialRef}
-              color="#ffe58a"
+              color={accent}
               transparent
               opacity={0.55}
               depthWrite={false}
@@ -113,6 +118,7 @@ export default function IslandModels3D({
   elements,
   newlyUnlockedIds = [],
   onElementClick,
+  theme,
 }: IslandModels3DProps) {
   return (
     <group>
@@ -129,6 +135,7 @@ export default function IslandModels3D({
               element={element}
               isNew={isNew}
               onElementClick={onElementClick}
+              accent={theme.accent}
             />
           </group>
         );

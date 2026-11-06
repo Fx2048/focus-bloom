@@ -6,28 +6,43 @@ export type ThemeConfig = {
   sky: [string, string];
   grass: [string, string];
   accent: string;
+  water: string;
+  soil: string;
+  stone: string;
 };
 
 export const THEME_CONFIGS: Record<IslandTheme, ThemeConfig> = {
   spring: {
-    sky: ['#c8e6ff', '#e8d5f0'],
-    grass: ['#7bc67e', '#5a9e5e'],
-    accent: '#ff9eb5',
+    sky: ['#c5e8f4', '#f3d9e7'],
+    grass: ['#83c779', '#4f965f'],
+    accent: '#f28eae',
+    water: '#48afc4',
+    soil: '#8e6046',
+    stone: '#66546d',
   },
   midnight: {
-    sky: ['#1a1a3e', '#2d1b4e'],
-    grass: ['#2d5a3d', '#1a3d2a'],
-    accent: '#a78bfa',
+    sky: ['#26365e', '#60436d'],
+    grass: ['#4c8061', '#2e594b'],
+    accent: '#d2a8ff',
+    water: '#438bab',
+    soil: '#5c4a58',
+    stone: '#3b3d57',
   },
   autumn: {
-    sky: ['#ffd9a0', '#ffb347'],
-    grass: ['#8b6914', '#a07c1a'],
-    accent: '#ff6b35',
+    sky: ['#ffe2b1', '#f0aa82'],
+    grass: ['#a69d4a', '#777d3e'],
+    accent: '#f47742',
+    water: '#4d9ca2',
+    soil: '#85543a',
+    stone: '#704e55',
   },
   tropical: {
-    sky: ['#00d2ff', '#3a7bd5'],
-    grass: ['#00b09b', '#96c93d'],
-    accent: '#ffce00',
+    sky: ['#8bdfdd', '#c9e9bd'],
+    grass: ['#35ad83', '#197a68'],
+    accent: '#ffd34d',
+    water: '#2ea6b7',
+    soil: '#765b3e',
+    stone: '#477278',
   },
 };
 
@@ -60,13 +75,17 @@ export function IslandCanvas({
       data-theme={theme}
       role="img"
       aria-label={`Isla en etapa ${stage}: ${STAGE_NAMES[stage - 1]}`}
-      style={{ minHeight: '400px' }}
+      style={{
+        minHeight: '400px',
+        background: `linear-gradient(155deg, ${THEME_CONFIGS[theme].sky[0]} 0%, ${THEME_CONFIGS[theme].sky[1]} 100%)`,
+      }}
     >
       <IslandScene3D
         stage={stage}
         elements={unlockedElements}
         newlyUnlockedIds={newlyUnlockedIds}
         onElementClick={onElementClick}
+        theme={THEME_CONFIGS[theme]}
       />
 
       <div className="absolute left-4 top-4 z-10 pointer-events-none">

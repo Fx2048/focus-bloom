@@ -2,6 +2,7 @@
 import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import type { ThemeConfig } from '../IslandCanvas';
 
 // Nube con movimiento horizontal y vertical suave.
 function Cloud({
@@ -75,7 +76,7 @@ function Cloud({
 }
 
 // Partículas mágicas estables y animadas.
-function MagicParticles() {
+function MagicParticles({ accent }: { accent: string }) {
   const particlesRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.PointsMaterial>(null);
 
@@ -84,9 +85,9 @@ function MagicParticles() {
     const values = new Float32Array(count * 3);
 
     for (let i = 0; i < count; i++) {
-      values[i * 3] = (Math.random() - 0.5) * 14;
-      values[i * 3 + 1] = Math.random() * 7;
-      values[i * 3 + 2] = (Math.random() - 0.5) * 14;
+      values[i * 3] = (((i * 37) % 101) / 100 - 0.5) * 13;
+      values[i * 3 + 1] = ((i * 61) % 97) / 14;
+      values[i * 3 + 2] = (((i * 29) % 89) / 88 - 0.5) * 13;
     }
 
     return values;
@@ -118,7 +119,7 @@ function MagicParticles() {
 
       <pointsMaterial
         ref={materialRef}
-        color="#ffe9a8"
+        color={accent}
         size={0.075}
         transparent
         opacity={0.7}
@@ -130,12 +131,9 @@ function MagicParticles() {
 }
 
 // Ambiente fantástico de la isla.
-export default function IslandEnvironment3D() {
+export default function IslandEnvironment3D({ theme }: { theme: ThemeConfig }) {
   return (
     <>
-      {/* Cielo */}
-      <color attach="background" args={['#b8dff5']} />
-
       {/* Nubes animadas */}
       <Cloud
         position={[-6, 4, -4]}
@@ -159,7 +157,16 @@ export default function IslandEnvironment3D() {
       />
 
       {/* Polvo mágico */}
-      <MagicParticles />
+      <mesh position={[-5.2, 4.2, -4.8]}>
+        <sphereGeometry args={[0.52, 24, 16]} />
+        <meshBasicMaterial color={theme.accent} />
+      </mesh>
+      <mesh position={[-5.2, 4.2, -4.8]}>
+        <sphereGeometry args={[0.76, 24, 16]} />
+        <meshBasicMaterial color={theme.accent} transparent opacity={0.12} />
+      </mesh>
+
+      <MagicParticles accent={theme.accent} />
     </>
   );
 }
