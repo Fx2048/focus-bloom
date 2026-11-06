@@ -21,6 +21,7 @@ interface IslandElement3DProps {
   type: ElementType;
   position: [number, number, number];
   scale?: number;
+  accent: string;
 }
 
 function Tree() {
@@ -44,7 +45,7 @@ function Tree() {
   );
 }
 
-function Flower() {
+function Flower({ accent }: { accent: string }) {
   return (
     <group>
       <mesh position={[0, 0.25, 0]}>
@@ -70,7 +71,7 @@ function Flower() {
             ]}
           >
             <sphereGeometry args={[0.13, 8, 8]} />
-            <meshStandardMaterial color="#ff91b5" />
+          <meshStandardMaterial color={accent} />
           </mesh>
         );
       })}
@@ -140,13 +141,13 @@ function Sprout() {
   );
 }
 
-function Crystal() {
+function Crystal({ accent }: { accent: string }) {
   return (
     <mesh position={[0, 0.55, 0]} rotation={[0, 0, 0.08]} castShadow>
       <octahedronGeometry args={[0.55, 0]} />
       <meshStandardMaterial
-        color="#a78bfa"
-        emissive="#7040d0"
+        color={accent}
+        emissive={accent}
         emissiveIntensity={0.35}
         roughness={0.2}
         metalness={0.25}
@@ -155,7 +156,7 @@ function Crystal() {
   );
 }
 
-function Butterfly() {
+function Butterfly({ accent }: { accent: string }) {
   return (
     <group>
       <mesh>
@@ -165,12 +166,12 @@ function Butterfly() {
 
       <mesh position={[-0.16, 0.05, 0]} scale={[1, 0.65, 0.15]}>
         <sphereGeometry args={[0.2, 8, 8]} />
-        <meshStandardMaterial color="#ff91c8" />
+        <meshStandardMaterial color={accent} />
       </mesh>
 
       <mesh position={[0.16, 0.05, 0]} scale={[1, 0.65, 0.15]}>
         <sphereGeometry args={[0.2, 8, 8]} />
-        <meshStandardMaterial color="#ff91c8" />
+        <meshStandardMaterial color={accent} />
       </mesh>
     </group>
   );
@@ -273,21 +274,21 @@ function Statue() {
   );
 }
 
-function Arch() {
+function Arch({ accent }: { accent: string }) {
   return (
     <group>
       {[-0.65, 0.65].map((x) => (
         <mesh key={x} position={[x, 0.8, 0]} castShadow>
           <boxGeometry args={[0.22, 1.6, 0.3]} />
-          <meshStandardMaterial color="#a88bd0" />
+          <meshStandardMaterial color={accent} />
         </mesh>
       ))}
 
       <mesh position={[0, 1.65, 0]}>
         <boxGeometry args={[1.5, 0.22, 0.3]} />
         <meshStandardMaterial
-          color="#c5a2fa"
-          emissive="#8754d4"
+          color={accent}
+          emissive={accent}
           emissiveIntensity={0.4}
         />
       </mesh>
@@ -295,13 +296,13 @@ function Arch() {
   );
 }
 
-function Sanctuary() {
+function Sanctuary({ accent }: { accent: string }) {
   return (
     <group>
       {/* Base */}
       <mesh position={[0, 0.2, 0]}>
         <cylinderGeometry args={[0.9, 1.05, 0.4, 8]} />
-        <meshStandardMaterial color="#a78bfa" />
+        <meshStandardMaterial color={accent} />
       </mesh>
 
       {/* Estructura central */}
@@ -314,8 +315,8 @@ function Sanctuary() {
       <mesh position={[0, 1.55, 0]}>
         <sphereGeometry args={[0.65, 12, 8]} />
         <meshStandardMaterial
-          color="#c7a5ff"
-          emissive="#8754d4"
+          color={accent}
+          emissive={accent}
           emissiveIntensity={0.6}
         />
       </mesh>
@@ -328,22 +329,23 @@ export default function IslandElement3D({
   type,
   position,
   scale = 1,
+  accent,
 }: IslandElement3DProps) {
   const models: Record<ElementType, React.ReactNode> = {
     sprout: <Sprout />,
-    flower: <Flower />,
+    flower: <Flower accent={accent} />,
     rock: <Rock />,
     bush: <Bush />,
     mushroom: <Mushroom />,
     tree: <Tree />,
-    butterfly: <Butterfly />,
-    crystal: <Crystal />,
+    butterfly: <Butterfly accent={accent} />,
+    crystal: <Crystal accent={accent} />,
     waterfall: <Waterfall />,
     cabin: <Cabin />,
     bridge: <Bridge />,
     statue: <Statue />,
-    arch: <Arch />,
-    sanctuary: <Sanctuary />,
+    arch: <Arch accent={accent} />,
+    sanctuary: <Sanctuary accent={accent} />,
   };
 
   const model = models[type];

@@ -1,5 +1,7 @@
 
-export default function IslandOcean3D() {
+import type { ThemeConfig } from '../IslandCanvas';
+
+export default function IslandOcean3D({ theme }: { theme: ThemeConfig }) {
   return (
     <group>
       {/* Superficie del océano */}
@@ -10,7 +12,7 @@ export default function IslandOcean3D() {
       >
         <circleGeometry args={[12, 64]} />
         <meshStandardMaterial
-          color="#287fa8"
+          color={theme.water}
           roughness={0.3}
           metalness={0.2}
         />
@@ -23,7 +25,7 @@ export default function IslandOcean3D() {
       >
         <ringGeometry args={[8.5, 9.2, 64]} />
         <meshBasicMaterial
-          color="#70d8e8"
+          color={theme.sky[0]}
           transparent
           opacity={0.45}
         />
