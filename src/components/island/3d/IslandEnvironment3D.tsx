@@ -150,7 +150,7 @@ export default function IslandEnvironment3D({ theme }: { theme: ThemeConfig }) {
       />
 
       <Cloud
-        position={[6, 3, 5]}
+        position={[6, 4.2, -4.5]}
         scale={1.1}
         speed={0.32}
         phase={4}
