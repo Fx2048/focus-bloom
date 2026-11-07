@@ -48,7 +48,7 @@ function FrameIsland() {
 
   useLayoutEffect(() => {
     if (!(camera instanceof ThreeOrthographicCamera)) return;
-    camera.zoom = Math.min(size.width / 13.5, size.height / 11);
+    camera.zoom = Math.min(size.width / 11.5, size.height / 9.5);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 

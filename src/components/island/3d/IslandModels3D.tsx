@@ -19,6 +19,7 @@ interface PlacedElementProps {
   isNew: boolean;
   onElementClick?: (element: UnlockedElement) => void;
   accent: string;
+  water: string;
 }
 
 function convertCoordinates(
@@ -37,6 +38,7 @@ function PlacedElement({
   isNew,
   onElementClick,
   accent,
+  water,
 }: PlacedElementProps) {
   const groupRef = useRef<Group>(null);
   const haloRef = useRef<Group>(null);
@@ -89,6 +91,7 @@ function PlacedElement({
         position={[0, 0, 0]}
         scale={1}
         accent={accent}
+        water={water}
       />
 
       {isNew && (
@@ -136,6 +139,7 @@ export default function IslandModels3D({
               isNew={isNew}
               onElementClick={onElementClick}
               accent={theme.accent}
+              water={theme.water}
             />
           </group>
         );
