@@ -136,22 +136,22 @@ export default function IslandEnvironment3D({ theme }: { theme: ThemeConfig }) {
     <>
       {/* Nubes animadas */}
       <Cloud
-        position={[-6, 4, -4]}
-        scale={1.4}
+        position={[-4.2, 4.8, -5]}
+        scale={1.05}
         speed={0.25}
         phase={0}
       />
 
       <Cloud
-        position={[5, 5, -3]}
-        scale={1.8}
+        position={[4, 5.1, -5]}
+        scale={1.2}
         speed={0.2}
         phase={2}
       />
 
       <Cloud
-        position={[6, 4.2, -4.5]}
-        scale={1.1}
+        position={[-0.4, 5.8, -6]}
+        scale={1.05}
         speed={0.32}
         phase={4}
       />

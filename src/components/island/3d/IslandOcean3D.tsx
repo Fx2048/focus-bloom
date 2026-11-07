@@ -12,16 +12,16 @@ function makeWaterTexture() {
 
   context.fillStyle = '#ffffff';
   context.fillRect(0, 0, 256, 256);
-  context.strokeStyle = '#8bbdc2';
-  context.lineWidth = 2;
-  context.globalAlpha = 0.42;
-  for (let y = 16; y < 256; y += 32) {
-    for (let x = 16; x < 256; x += 32) {
+  context.strokeStyle = '#b5e0df';
+  context.lineWidth = 1.5;
+  context.globalAlpha = 0.18;
+  for (let y = 18; y < 256; y += 42) {
+    for (let x = 18; x < 256; x += 42) {
       context.beginPath();
-      context.arc(x, y, 9, 0.15, Math.PI * 1.55);
+      context.arc(x, y, 12, 0.15, Math.PI * 1.55);
       context.stroke();
       context.beginPath();
-      context.arc(x + 13, y + 12, 6, Math.PI, Math.PI * 1.85);
+      context.arc(x + 17, y + 16, 8, Math.PI, Math.PI * 1.85);
       context.stroke();
     }
   }
@@ -31,7 +31,7 @@ function makeWaterTexture() {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(34, 34);
+  texture.repeat.set(19, 19);
   texture.anisotropy = 4;
   return texture;
 }

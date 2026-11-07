@@ -234,8 +234,8 @@ function Waterfall({ water }: { water: string }) {
   return (
     <group>
       {/* Velo de agua que cae desde la orilla de la isla. */}
-      <mesh position={[0, -0.35, 0]}>
-        <boxGeometry args={[0.58, 1.55, 0.14]} />
+      <mesh position={[0, -1.62, 0]}>
+        <boxGeometry args={[0.58, 3.36, 0.14]} />
         <meshStandardMaterial
           color={water}
           emissive={water}
@@ -250,14 +250,14 @@ function Waterfall({ water }: { water: string }) {
 
       {/* Hilos luminosos que sugieren movimiento en la cascada. */}
       {[-0.17, 0, 0.17].map((x, index) => (
-        <mesh key={x} position={[x, -0.34 + index * 0.04, 0.09]}>
-          <boxGeometry args={[0.035, 1.27 - index * 0.08, 0.025]} />
+        <mesh key={x} position={[x, -1.62 + index * 0.04, 0.09]}>
+          <boxGeometry args={[0.035, 3.05 - index * 0.1, 0.025]} />
           <meshBasicMaterial color="#e4fbfa" transparent opacity={0.62} />
         </mesh>
       ))}
 
       {/* Poza de agua al pie de la cascada. */}
-      <mesh position={[0.02, -1.08, 0.13]} scale={[1.25, 0.18, 0.72]}>
+      <mesh position={[0.02, -3.2, 0.13]} scale={[1.25, 0.18, 0.72]}>
         <sphereGeometry args={[0.42, 16, 10]} />
         <meshStandardMaterial color={water} roughness={0.18} metalness={0.12} />
       </mesh>
