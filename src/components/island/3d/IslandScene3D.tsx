@@ -2,6 +2,7 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import { OrthographicCamera } from '@react-three/drei';
 import { useLayoutEffect } from 'react';
+import { OrthographicCamera as ThreeOrthographicCamera } from 'three';
 
 import IslandTerrain3D from './IslandTerrain3D';
 import IslandOcean3D from './IslandOcean3D';
@@ -46,8 +47,8 @@ function FrameIsland() {
   const { camera, size } = useThree();
 
   useLayoutEffect(() => {
-    if (!(camera instanceof THREE.OrthographicCamera)) return;
-    camera.zoom = Math.min(size.width / 13.5, size.height / 11);
+    if (!(camera instanceof ThreeOrthographicCamera)) return;
+    camera.zoom = Math.min(size.width / 11.5, size.height / 9.5);
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 

@@ -6,3 +6,4 @@
 - Generate and grade learning checks on the server and save each attempt, because progress must reflect submitted answers.
 - Expose assessment answer keys only through owner-verified server reads after atomic one-time grading, because concurrent submissions must not rewrite completed attempts.
 - Keep workspace AI access blocks server-controlled, because ordinary students cannot authorize workspace-wide credit or policy recovery.
+- Keep the gamification island's 3D scene behind the existing IslandCanvas props and progression catalog, because visual changes must not alter XP, unlock persistence, or academic-world state.
