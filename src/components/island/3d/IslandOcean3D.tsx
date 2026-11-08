@@ -31,7 +31,7 @@ function makeWaterTexture() {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
-  texture.repeat.set(19, 19);
+  texture.repeat.set(4, 4);
   texture.anisotropy = 4;
   return texture;
 }
@@ -42,13 +42,13 @@ export default function IslandOcean3D({ theme }: { theme: ThemeConfig }) {
 
   return (
     <group>
-      {/* The broad plane keeps the water continuous through every viewport. */}
+      {/* The round lagoon leaves a clear sky horizon around the floating island. */}
       <mesh
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, -3.5, 0]}
         receiveShadow
       >
-        <planeGeometry args={[200, 200]} />
+        <circleGeometry args={[12, 64]} />
         <meshStandardMaterial
           color={theme.water}
           map={waterTexture ?? undefined}
