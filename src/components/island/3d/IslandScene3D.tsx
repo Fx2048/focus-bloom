@@ -8,6 +8,7 @@ import IslandTerrain3D from './IslandTerrain3D';
 import IslandOcean3D from './IslandOcean3D';
 import IslandEnvironment3D from './IslandEnvironment3D';
 import IslandModels3D from './IslandModels3D';
+import IslandAnimals3D from './IslandAnimals3D';
 
 import type { UnlockedElement } from '../useIslandProgression';
 import type { ThemeConfig } from '../IslandCanvas';
@@ -70,6 +71,7 @@ function SceneContent({
       <IslandOcean3D theme={theme} />
 
       <IslandTerrain3D stage={stage} theme={theme} />
+      <IslandAnimals3D />
 
       <IslandModels3D
         elements={elements}
