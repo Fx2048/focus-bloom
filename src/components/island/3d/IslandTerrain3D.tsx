@@ -12,28 +12,34 @@ function makeGrassTexture(grass: string, detail: string) {
   const canvas = document.createElement('canvas');
   canvas.width = 512;
   canvas.height = 512;
+
   const context = canvas.getContext('2d');
   if (!context) return null;
 
   context.fillStyle = grass;
   context.fillRect(0, 0, canvas.width, canvas.height);
+
   for (let i = 0; i < 900; i++) {
     const x = (i * 197.3) % canvas.width;
     const y = (i * 283.7) % canvas.height;
     const length = 2 + ((i * 17) % 7);
+
     context.globalAlpha = 0.08 + ((i * 13) % 10) / 100;
     context.strokeStyle = i % 4 === 0 ? '#f0f0cf' : detail;
     context.lineWidth = i % 5 === 0 ? 2 : 1;
+
     context.beginPath();
     context.moveTo(x, y);
     context.lineTo(x + ((i % 3) - 1) * 2, y - length);
     context.stroke();
   }
+
   context.globalAlpha = 1;
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.anisotropy = 4;
+
   return texture;
 }
 
@@ -77,11 +83,12 @@ function GrassClump({
   );
 }
 
-export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) {
+export default function IslandTerrain3D({ theme }: IslandTerrain3DProps) {
   const grassTexture = useMemo(
     () => makeGrassTexture(theme.grass[0], theme.grass[1]),
     [theme.grass],
   );
+
   useEffect(() => () => grassTexture?.dispose(), [grassTexture]);
 
   const colors = {
@@ -105,10 +112,7 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
       {/* Capa inferior de tierra */}
       <mesh position={[0, -0.9, 0]} castShadow receiveShadow>
         <cylinderGeometry args={[3.8, 3.1, 1.25, 14]} />
-        <meshStandardMaterial
-          color={colors.earth}
-          roughness={1}
-        />
+        <meshStandardMaterial color={colors.earth} roughness={1} />
       </mesh>
 
       {/* Punta rocosa inferior */}
@@ -120,25 +124,44 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
         />
       </mesh>
 
-      {/* Faceted stones make the floating underside read as layered rock. */}
+      {/* Rocas facetadas */}
       {Array.from({ length: 8 }, (_, index) => {
         const angle = (index / 8) * Math.PI * 2;
         const radius = 2.1 + (index % 2) * 0.25;
+
         return (
           <mesh
             key={index}
-            position={[Math.cos(angle) * radius, -1.18 - (index % 3) * 0.13, Math.sin(angle) * radius]}
-            rotation={[0.18 * (index % 2), angle, 0.12 * (index % 3)]}
-            scale={[0.65, 1.05 + (index % 3) * 0.16, 0.58]}
+            position={[
+              Math.cos(angle) * radius,
+              -1.18 - (index % 3) * 0.13,
+              Math.sin(angle) * radius,
+            ]}
+            rotation={[
+              0.18 * (index % 2),
+              angle,
+              0.12 * (index % 3),
+            ]}
+            scale={[
+              0.65,
+              1.05 + (index % 3) * 0.16,
+              0.58,
+            ]}
             castShadow
           >
             <dodecahedronGeometry args={[0.8, 0]} />
-            <meshStandardMaterial color={colors.earth} roughness={0.95} flatShading />
+            <meshStandardMaterial
+              color={colors.earth}
+              roughness={0.95}
+              flatShading
+            />
           </mesh>
         );
       })}
 
-      {/* Vegetación inicial */}
+      {/* Vegetación permanente: disponible desde el nivel 1 */}
+
+      {/* Parches iniciales */}
       <GrassPatch
         position={[-1.8, 0.14, 0.5]}
         color={colors.detail}
@@ -148,77 +171,62 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
         color={colors.detail}
       />
 
-      {/* Etapa 2: pequeños brotes */}
-      {stage >= 2 && (
-        <group>
-          <GrassClump
-            position={[-2.1, 0.14, -0.3]}
-            color={colors.detail}
-          />
-          <GrassClump
-            position={[2, 0.14, 0.4]}
-            color={colors.detail}
-          />
-        </group>
-      )}
+      {/* Brotes */}
+      <GrassClump
+        position={[-2.1, 0.14, -0.3]}
+        color={colors.detail}
+      />
+      <GrassClump
+        position={[2, 0.14, 0.4]}
+        color={colors.detail}
+      />
 
-      {/* Etapa 3: vegetación más abundante */}
-      {stage >= 3 && (
-        <group>
-          <GrassPatch
-            position={[-1, 0.14, 1.3]}
-            scale={1.3}
-            color={colors.detail}
-          />
-          <GrassPatch
-            position={[1.2, 0.14, -1.2]}
-            scale={1.2}
-            color={colors.detail}
-          />
-          <GrassClump
-            position={[0.2, 0.14, 1.8]}
-            color={colors.detail}
-          />
-        </group>
-      )}
+      {/* Vegetación abundante */}
+      <GrassPatch
+        position={[-1, 0.14, 1.3]}
+        scale={1.3}
+        color={colors.detail}
+      />
+      <GrassPatch
+        position={[1.2, 0.14, -1.2]}
+        scale={1.2}
+        color={colors.detail}
+      />
+      <GrassClump
+        position={[0.2, 0.14, 1.8]}
+        color={colors.detail}
+      />
 
-      {/* Etapa 4: isla exuberante */}
-      {stage >= 4 && (
-        <group>
-          <GrassClump
-            position={[-2.5, 0.14, 1]}
-            color={colors.detail}
-          />
-          <GrassClump
-            position={[2.4, 0.14, -1]}
-            color={colors.detail}
-          />
-          <GrassPatch
-            position={[0, 0.14, -2]}
-            scale={1.4}
-            color={colors.detail}
-          />
-        </group>
-      )}
+      {/* Vegetación exuberante */}
+      <GrassClump
+        position={[-2.5, 0.14, 1]}
+        color={colors.detail}
+      />
+      <GrassClump
+        position={[2.4, 0.14, -1]}
+        color={colors.detail}
+      />
+      <GrassPatch
+        position={[0, 0.14, -2]}
+        scale={1.4}
+        color={colors.detail}
+      />
 
-      {/* Etapa 5: paraíso floreciente */}
-      {stage >= 5 && (
-        <group>
-          <GrassClump
-            position={[-0.8, 0.14, -2.2]}
-            color={theme.accent}
-          />
-          <GrassClump
-            position={[1.8, 0.14, 1.5]}
-            color={theme.accent}
-          />
-          <GrassPatch
-            position={[-1.7, 0.14, -1.5]}
-            scale={1.3}
-            color={theme.grass[0]}
-          />
-        </group>
-      )}
+      {/* Detalles decorativos */}
+      <GrassClump
+        position={[-0.8, 0.14, -2.2]}
+        color={theme.accent}
+      />
+      <GrassClump
+        position={[1.8, 0.14, 1.5]}
+        color={theme.accent}
+      />
+      <GrassPatch
+        position={[-1.7, 0.14, -1.5]}
+        scale={1.3}
+        color={colors.grass}
+      />
     </group>
   );
 }
+
