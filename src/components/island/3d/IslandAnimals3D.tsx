@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import type { Group } from 'three';
@@ -32,16 +32,56 @@ function nextWanderTarget(index: number, step: number) {
   );
 }
 
+function RiceFeed({ onComplete }: { onComplete: () => void }) {
+  const riceRef = useRef<Group>(null);
+  const elapsed = useRef(0);
+  const completed = useRef(false);
+  const start = useRef(new THREE.Vector3(0.38, 0.92, 0.95));
+  const mouth = useRef(new THREE.Vector3(0, 0.35, 0.43));
+
+  useFrame((_, delta) => {
+    if (!riceRef.current || completed.current) return;
+    elapsed.current += delta;
+    const progress = Math.min(elapsed.current / 0.55, 1);
+    riceRef.current.position.lerpVectors(start.current, mouth.current, progress);
+    riceRef.current.position.y += Math.sin(progress * Math.PI) * 0.18;
+    riceRef.current.rotation.y = progress * Math.PI * 2;
+    riceRef.current.scale.setScalar(1 - progress * 0.45);
+
+    if (progress === 1) {
+      completed.current = true;
+      onComplete();
+    }
+  });
+
+  return (
+    <group ref={riceRef}>
+      <mesh rotation={[0.2, 0, 0.5]} scale={[0.045, 0.025, 0.09]}>
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshStandardMaterial color="#fff8df" roughness={0.75} />
+      </mesh>
+      <mesh position={[0.035, 0.025, -0.035]} rotation={[0, 0, -0.4]} scale={[0.035, 0.02, 0.065]}>
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshStandardMaterial color="#fffdf3" roughness={0.75} />
+      </mesh>
+    </group>
+  );
+}
+
 function AnimalModel({
   kind,
   color,
   accent,
   bodyRef,
+  feedId,
+  onFeedComplete,
 }: {
   kind: string;
   color: string;
   accent: string;
   bodyRef: React.RefObject<Group>;
+  feedId: number;
+  onFeedComplete: () => void;
 }) {
   const isRabbit = kind === 'rabbit';
   const isFox = kind === 'fox';
@@ -148,6 +188,7 @@ function AnimalModel({
           <meshStandardMaterial color={accent} roughness={0.9} />
         </mesh>
       )}
+      {feedId > 0 && <RiceFeed key={feedId} onComplete={onFeedComplete} />}
     </group>
   );
 }
@@ -156,16 +197,24 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
   const groupRef = useRef<Group>(null);
   const bodyRef = useRef<Group>(null);
   const dragging = useRef(false);
+  const dragged = useRef(false);
+  const pointerStart = useRef({ x: 0, y: 0 });
   const step = useRef(0);
   const target = useRef(nextWanderTarget(index, 1));
   const dragPoint = useRef(new THREE.Vector3());
+  const growth = useRef(1);
+  const feedPause = useRef(0);
+  const [feedId, setFeedId] = useState(0);
   const scale = 0.78 + (index % 4) * 0.07;
 
   useFrame(({ clock }, delta) => {
     const group = groupRef.current;
     if (!group || !bodyRef.current) return;
 
-    if (!dragging.current) {
+    group.scale.setScalar(THREE.MathUtils.damp(group.scale.x, scale * growth.current, 4, delta));
+    feedPause.current = Math.max(0, feedPause.current - delta);
+
+    if (!dragging.current && feedPause.current === 0) {
       const dx = target.current.x - group.position.x;
       const dz = target.current.z - group.position.z;
       const distance = Math.hypot(dx, dz);
@@ -192,10 +241,16 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
       onPointerDown={(event) => {
         event.stopPropagation();
         dragging.current = true;
+        dragged.current = false;
+        pointerStart.current = { x: event.clientX, y: event.clientY };
         (event.target as Element).setPointerCapture(event.pointerId);
       }}
       onPointerMove={(event) => {
         if (!dragging.current || !groupRef.current) return;
+        if (Math.hypot(event.clientX - pointerStart.current.x, event.clientY - pointerStart.current.y) > 6) {
+          dragged.current = true;
+        }
+        if (!dragged.current) return;
         event.stopPropagation();
         const point = event.ray.intersectPlane(DRAG_PLANE, dragPoint.current);
         if (!point) return;
@@ -209,9 +264,15 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
         event.stopPropagation();
         dragging.current = false;
         (event.target as Element).releasePointerCapture(event.pointerId);
+        if (!dragged.current) {
+          growth.current = Math.min(1.65, growth.current + 0.1);
+          feedPause.current = 0.55;
+          setFeedId((current) => current + 1);
+        }
       }}
       onPointerCancel={() => {
         dragging.current = false;
+        dragged.current = false;
       }}
       onPointerOver={(event) => {
         event.stopPropagation();
@@ -226,6 +287,8 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
         color={animal.color}
         accent={animal.accent}
         bodyRef={bodyRef}
+        feedId={feedId}
+        onFeedComplete={() => setFeedId((current) => (current === feedId ? 0 : current))}
       />
     </group>
   );

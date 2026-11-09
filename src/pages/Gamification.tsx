@@ -306,7 +306,7 @@ export default function Gamification() {
             <div className="rounded-2xl border border-primary/20 bg-primary/5 p-3 text-center">
               <p className="text-xs text-muted-foreground">
                 <Map className="mb-0.5 mr-1 inline h-3 w-3" />
-                Toca cualquier elemento para descubrir cómo lo desbloqueaste. Arrastra los animalitos para moverlos; también pasean solos por la isla
+                Toca los animalitos para darles arrocito y verlos crecer. Arrástralos para moverlos; también pasean solos por la isla
               </p>
             </div>
 
