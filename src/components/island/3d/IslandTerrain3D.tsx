@@ -95,7 +95,7 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
     <group>
       {/* Base de tierra */}
       <mesh position={[0, -0.05, 0]} receiveShadow castShadow>
-        <cylinderGeometry args={[3.8, 3.8, 0.35, 14]} />
+        <cylinderGeometry args={[4.8, 4.8, 0.35, 16]} />
         <meshStandardMaterial
           map={grassTexture ?? undefined}
           roughness={0.9}
@@ -104,7 +104,7 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
 
       {/* Capa inferior de tierra */}
       <mesh position={[0, -0.9, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[3.8, 3.1, 1.25, 14]} />
+        <cylinderGeometry args={[4.8, 3.9, 1.25, 16]} />
         <meshStandardMaterial
           color={colors.earth}
           roughness={1}
@@ -113,7 +113,7 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
 
       {/* Punta rocosa inferior */}
       <mesh position={[0, -2, 0]} castShadow>
-        <coneGeometry args={[3.1, 2.55, 10]} />
+        <coneGeometry args={[3.9, 2.55, 12]} />
         <meshStandardMaterial
           color={colors.lowerEarth}
           roughness={0.95}
@@ -123,7 +123,7 @@ export default function IslandTerrain3D({ stage, theme }: IslandTerrain3DProps) 
       {/* Faceted stones make the floating underside read as layered rock. */}
       {Array.from({ length: 8 }, (_, index) => {
         const angle = (index / 8) * Math.PI * 2;
-        const radius = 2.1 + (index % 2) * 0.25;
+        const radius = 2.7 + (index % 2) * 0.3;
         return (
           <mesh
             key={index}

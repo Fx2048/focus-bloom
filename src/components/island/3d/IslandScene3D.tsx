@@ -9,6 +9,8 @@ import IslandOcean3D from './IslandOcean3D';
 import IslandEnvironment3D from './IslandEnvironment3D';
 import IslandModels3D from './IslandModels3D';
 import IslandAnimals3D from './IslandAnimals3D';
+import IslandArchipelago3D from './IslandArchipelago3D';
+import IslandCharacter3D from './IslandCharacter3D';
 
 import type { UnlockedElement } from '../useIslandProgression';
 import type { ThemeConfig } from '../IslandCanvas';
@@ -42,14 +44,12 @@ function SceneLighting({ accent }: { accent: string }) {
   );
 }
 
-interface SceneContentProps extends IslandScene3DProps {}
-
 function FrameIsland() {
   const { camera, size } = useThree();
 
   useLayoutEffect(() => {
     if (!(camera instanceof ThreeOrthographicCamera)) return;
-    camera.zoom = Math.min(size.width / 11.5, size.height / 9.5) * 0.76;
+    camera.zoom = Math.min(size.width / 11.5, size.height / 9.5) * 0.62;
     camera.updateProjectionMatrix();
   }, [camera, size.width, size.height]);
 
@@ -62,7 +62,7 @@ function SceneContent({
   newlyUnlockedIds,
   onElementClick,
   theme,
-}: SceneContentProps) {
+}: IslandScene3DProps) {
   return (
     <>
       <FrameIsland />
@@ -71,7 +71,9 @@ function SceneContent({
       <IslandOcean3D theme={theme} />
 
       <IslandTerrain3D stage={stage} theme={theme} />
+      <IslandArchipelago3D />
       <IslandAnimals3D />
+      <IslandCharacter3D />
 
       <IslandModels3D
         elements={elements}

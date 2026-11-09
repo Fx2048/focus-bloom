@@ -93,6 +93,11 @@ export function IslandCanvas({
           Etapa {stage} • {STAGE_NAMES[stage - 1]}
         </div>
       </div>
+      <div className="absolute bottom-4 left-4 z-10 pointer-events-none">
+        <div className="rounded-full bg-black/35 px-3 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-sm">
+          🌎 Andes · Amazonas · Machu Picchu · 2 dedos para mover
+        </div>
+      </div>
     </div>
   );
 }
