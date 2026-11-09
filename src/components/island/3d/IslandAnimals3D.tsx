@@ -94,6 +94,42 @@ function RiceFeed({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+function RiceFeed({ onComplete }: { onComplete: () => void }) {
+  const riceRef = useRef<Group>(null);
+  const elapsed = useRef(0);
+  const completed = useRef(false);
+  const start = useRef(new THREE.Vector3(0.38, 0.92, 0.95));
+  const mouth = useRef(new THREE.Vector3(0, 0.35, 0.43));
+
+  useFrame((_, delta) => {
+    if (!riceRef.current || completed.current) return;
+    elapsed.current += delta;
+    const progress = Math.min(elapsed.current / 0.55, 1);
+    riceRef.current.position.lerpVectors(start.current, mouth.current, progress);
+    riceRef.current.position.y += Math.sin(progress * Math.PI) * 0.18;
+    riceRef.current.rotation.y = progress * Math.PI * 2;
+    riceRef.current.scale.setScalar(1 - progress * 0.45);
+
+    if (progress === 1) {
+      completed.current = true;
+      onComplete();
+    }
+  });
+
+  return (
+    <group ref={riceRef}>
+      <mesh rotation={[0.2, 0, 0.5]} scale={[0.045, 0.025, 0.09]}>
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshStandardMaterial color="#fff8df" roughness={0.75} />
+      </mesh>
+      <mesh position={[0.035, 0.025, -0.035]} rotation={[0, 0, -0.4]} scale={[0.035, 0.02, 0.065]}>
+        <sphereGeometry args={[1, 10, 8]} />
+        <meshStandardMaterial color="#fffdf3" roughness={0.75} />
+      </mesh>
+    </group>
+  );
+}
+
 function AnimalModel({
   kind,
   color,
