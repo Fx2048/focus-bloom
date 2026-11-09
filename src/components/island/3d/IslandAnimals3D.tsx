@@ -16,19 +16,45 @@ const ANIMALS = [
   { kind: 'frog', color: '#79bf70', accent: '#f0d95c', x: -2.35, z: 0.65 },
   { kind: 'sheep', color: '#f4f0e5', accent: '#a77b70', x: -1.25, z: -0.55 },
   { kind: 'cat', color: '#e5a56d', accent: '#fff0dc', x: 1.1, z: 0.1 },
+  { kind: 'capybara', color: '#a87850', accent: '#e5c39c', x: -3.2, z: 0.35 },
+  { kind: 'jaguar', color: '#dda34c', accent: '#533a2f', x: 3.2, z: 0.7 },
+  { kind: 'toucan', color: '#252936', accent: '#f4a332', x: -0.25, z: 3.3 },
+  { kind: 'macaw', color: '#e84c48', accent: '#f3cb4d', x: 0.8, z: -3.25 },
+  { kind: 'sloth', color: '#8f7950', accent: '#d5c596', x: -3.35, z: -1.25 },
+  { kind: 'monkey', color: '#925d42', accent: '#e3b18d', x: 3.35, z: -1.2 },
+  { kind: 'condor', color: '#34353d', accent: '#e9e3d4', x: 2.65, z: 2.55 },
+  { kind: 'llama', color: '#d9c6a4', accent: '#795844', x: -5.25, z: -0.5, island: 'andes' },
+  { kind: 'alpaca', color: '#f1eadb', accent: '#ad8d7b', x: -5.8, z: 0.7, island: 'andes' },
+  { kind: 'llama', color: '#ba8b64', accent: '#f0d2ac', x: -6.75, z: -0.6, island: 'andes' },
+  { kind: 'jaguar', color: '#dca449', accent: '#49352a', x: 5.85, z: -0.65, island: 'amazon' },
+  { kind: 'capybara', color: '#a97a53', accent: '#e4c49e', x: 6.65, z: 0.6, island: 'amazon' },
+  { kind: 'sloth', color: '#85744f', accent: '#d4c393', x: 5.8, z: 0.8, island: 'amazon' },
+  { kind: 'monkey', color: '#986242', accent: '#edbd98', x: 0.2, z: -5.4, island: 'machu-picchu' },
+  { kind: 'toucan', color: '#292b34', accent: '#f2a32e', x: 0.7, z: -6.8, island: 'machu-picchu' },
+  { kind: 'elephant', color: '#8a8c94', accent: '#d5d5d1', x: -0.65, z: -6.3, island: 'machu-picchu' },
 ] as const;
 
 const GROUND_Y = 0.17;
-const ISLAND_RADIUS = 3.05;
+const ISLAND_RADIUS = 4.45;
 const DRAG_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), -GROUND_Y);
 
-function nextWanderTarget(index: number, step: number) {
+const ISLAND_CENTERS = {
+  main: [0, 0],
+  andes: [-6.1, 0],
+  amazon: [6.1, 0],
+  'machu-picchu': [0, -6.1],
+} as const;
+
+function nextWanderTarget(index: number, step: number, island: keyof typeof ISLAND_CENTERS) {
   const angle = index * 2.4 + step * 2.15;
-  const radius = 0.65 + ((index + step) % 4) * 0.52;
+  const radius = island === 'main'
+    ? 0.65 + ((index + step) % 4) * 0.52
+    : 0.2 + ((index + step) % 3) * 0.27;
+  const [centerX, centerZ] = ISLAND_CENTERS[island];
   return new THREE.Vector3(
-    Math.cos(angle) * radius,
+    centerX + Math.cos(angle) * radius,
     GROUND_Y,
-    Math.sin(angle) * radius,
+    centerZ + Math.sin(angle) * radius,
   );
 }
 
@@ -74,6 +100,7 @@ function AnimalModel({
   accent,
   bodyRef,
   feedId,
+  growth,
   onFeedComplete,
 }: {
   kind: string;
@@ -81,25 +108,30 @@ function AnimalModel({
   accent: string;
   bodyRef: React.RefObject<Group>;
   feedId: number;
+  growth: number;
   onFeedComplete: () => void;
 }) {
   const isRabbit = kind === 'rabbit';
   const isFox = kind === 'fox';
   const isCat = kind === 'cat';
-  const isBird = kind === 'bird' || kind === 'chick';
   const isFrog = kind === 'frog';
   const isTurtle = kind === 'turtle';
   const isSheep = kind === 'sheep';
+  const isElephant = kind === 'elephant';
+  const isCapybara = kind === 'capybara';
+  const isCamelid = kind === 'llama' || kind === 'alpaca';
+  const isRooster = kind === 'chick' && growth >= 1.3;
+  const isBird = ['bird', 'chick', 'toucan', 'macaw', 'condor'].includes(kind);
   const earGeometry = isRabbit ? 'ellipsoid' : isFox || isCat || isFrog ? 'cone' : null;
 
   return (
     <group ref={bodyRef}>
-      <mesh position={[0, 0.22, 0]} scale={isTurtle ? [0.29, 0.16, 0.35] : [0.3, 0.22, 0.38]} castShadow>
+      <mesh position={[0, 0.22, 0]} scale={isTurtle ? [0.29, 0.16, 0.35] : isCapybara ? [0.38, 0.25, 0.42] : isElephant ? [0.38, 0.3, 0.43] : [0.3, 0.22, isCamelid ? 0.31 : 0.38]} castShadow>
         <sphereGeometry args={[1, 16, 12]} />
         <meshStandardMaterial color={isTurtle ? accent : color} roughness={0.82} />
       </mesh>
       {!isTurtle && (
-        <mesh position={[0, 0.39, 0.2]} scale={isBird ? [0.2, 0.2, 0.22] : [0.22, 0.23, 0.22]} castShadow>
+        <mesh position={[0, isCamelid ? 0.72 : 0.39, isCamelid ? 0.16 : 0.2]} scale={isBird ? [0.2, 0.2, 0.22] : isElephant ? [0.28, 0.26, 0.26] : [0.22, 0.23, 0.22]} castShadow>
           <sphereGeometry args={[1, 16, 12]} />
           <meshStandardMaterial color={color} roughness={0.78} />
         </mesh>
@@ -144,9 +176,45 @@ function AnimalModel({
 
       {isBird && (
         <mesh position={[0, 0.38, 0.4]} rotation={[Math.PI / 2, 0, 0]}>
-          <coneGeometry args={[0.08, 0.17, 7]} />
+          <coneGeometry args={[kind === 'toucan' ? 0.13 : 0.08, kind === 'toucan' ? 0.3 : 0.17, 7]} />
           <meshStandardMaterial color={accent} />
         </mesh>
+      )}
+      {isElephant && (
+        <>
+          {[-1, 1].map((side) => (
+            <mesh key={side} position={[side * 0.27, 0.42, 0.12]} scale={[0.22, 0.25, 0.06]}>
+              <sphereGeometry args={[1, 12, 10]} />
+              <meshStandardMaterial color={accent} />
+            </mesh>
+          ))}
+          <mesh position={[0, 0.2, 0.54]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.07, 0.09, 0.42, 10]} />
+            <meshStandardMaterial color={color} />
+          </mesh>
+        </>
+      )}
+      {isCamelid && [-1, 1].map((side) => (
+        <mesh key={side} position={[side * 0.13, 1.01, 0.15]} rotation={[0, 0, side * -0.12]}>
+          <capsuleGeometry args={[0.045, 0.24, 4, 8]} />
+          <meshStandardMaterial color={accent} />
+        </mesh>
+      ))}
+      {isRooster && (
+        <>
+          <mesh position={[0, 0.61, 0.21]}>
+            <sphereGeometry args={[0.1, 10, 8]} />
+            <meshStandardMaterial color="#d94139" />
+          </mesh>
+          <mesh position={[0, 0.73, 0.2]}>
+            <coneGeometry args={[0.085, 0.2, 6]} />
+            <meshStandardMaterial color="#c93634" />
+          </mesh>
+          <mesh position={[0, 0.38, -0.3]} rotation={[0.4, 0, 0]}>
+            <coneGeometry args={[0.17, 0.5, 6]} />
+            <meshStandardMaterial color="#287b50" />
+          </mesh>
+        </>
       )}
 
       {!isBird && !isTurtle && (
@@ -200,11 +268,13 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
   const dragged = useRef(false);
   const pointerStart = useRef({ x: 0, y: 0 });
   const step = useRef(0);
-  const target = useRef(nextWanderTarget(index, 1));
   const dragPoint = useRef(new THREE.Vector3());
   const growth = useRef(1);
   const feedPause = useRef(0);
   const [feedId, setFeedId] = useState(0);
+  const island = animal.island ?? 'main';
+  const [centerX, centerZ] = ISLAND_CENTERS[island];
+  const target = useRef(nextWanderTarget(index, 1, island));
   const scale = 0.78 + (index % 4) * 0.07;
 
   useFrame(({ clock }, delta) => {
@@ -221,7 +291,7 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
 
       if (distance < 0.12) {
         step.current += 1;
-        target.current = nextWanderTarget(index, step.current + 1);
+        target.current = nextWanderTarget(index, step.current + 1, island);
       } else {
         const travel = Math.min(distance, delta * (0.32 + (index % 3) * 0.07));
         group.position.x += (dx / distance) * travel;
@@ -254,10 +324,13 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
         event.stopPropagation();
         const point = event.ray.intersectPlane(DRAG_PLANE, dragPoint.current);
         if (!point) return;
-        const distance = Math.hypot(point.x, point.z);
-        const factor = distance > ISLAND_RADIUS ? ISLAND_RADIUS / distance : 1;
-        groupRef.current.position.x = point.x * factor;
-        groupRef.current.position.z = point.z * factor;
+        const dx = point.x - centerX;
+        const dz = point.z - centerZ;
+        const distance = Math.hypot(dx, dz);
+        const maxRadius = island === 'main' ? ISLAND_RADIUS : 1.35;
+        const factor = distance > maxRadius ? maxRadius / distance : 1;
+        groupRef.current.position.x = centerX + dx * factor;
+        groupRef.current.position.z = centerZ + dz * factor;
         target.current.set(groupRef.current.position.x, GROUND_Y, groupRef.current.position.z);
       }}
       onPointerUp={(event) => {
@@ -288,6 +361,7 @@ function WanderingAnimal({ animal, index }: { animal: (typeof ANIMALS)[number]; 
         accent={animal.accent}
         bodyRef={bodyRef}
         feedId={feedId}
+        growth={growth.current}
         onFeedComplete={() => setFeedId((current) => (current === feedId ? 0 : current))}
       />
     </group>
